@@ -1,4 +1,4 @@
-const ngrok_link = "55b2-99-112-76-183.ngrok.io";                                                                                                                                                                                                               
+const ngrok_link = "4578-71-75-10-144.ngrok.io";                                                                                                                                                                                                                
 //(DESC) Element defines from the webpage
 const chat = document.querySelector("#chat");
 const is_typing_box = document.querySelector("#is_typing_box");
