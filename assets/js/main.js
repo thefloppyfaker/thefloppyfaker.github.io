@@ -526,6 +526,7 @@ function add_message_to_message_ids_array(id, cached=false) {
         between_message_ids.older = message_ids_array[i];
         between_message_ids.newer = message_ids_array[i+1];
         message_ids_array.splice(i+1, 0, id);
+        message_ids_metadata_array.splice(i+1, 0, metadata);
         break;
       }
     }
@@ -760,6 +761,7 @@ var message_elements_below_cache = [];
 
 
 function check_chat_elements_above_and_below() {
+  if (chat.firstElementChild === null) return;
   if (chat.firstElementChild.getBoundingClientRect().bottom <= chat_wrapper.clientHeight * -5) {
     //(DESC) This element is too far above the viewport, add it (in it's proper order, oldest message at the 0 index, newest message at the -1 index (last)) to the message_elements_above_cache array and remove it from the chat
     while (true) { //(DESC) Limit the otherwise infinite loop to 100 iterations.
@@ -1330,6 +1332,9 @@ if ("WebSocket" in window) {
       }
       else {
         console.log("ERROR: this SHOULDN'T BE   H A P P E N I N GG  D FAFD");
+        console.log("older_message_metadata=",older_message_metadata);
+        console.log("added_message=",added_message);
+        console.log("added_message.between_message_ids.older=",added_message.between_message_ids.older);
       }
       
       if (scrolled_to_bottom) {
@@ -1382,6 +1387,9 @@ if ("WebSocket" in window) {
       }
       else {
         console.log("ERROR: this SHOULDN'T BE HAPPENINGINGINGINGINGIGINIASENDFOIJSDOIFJ");
+        console.log("between newer_message_metadata=",newer_message_metadata);
+        console.log("between added_message=",added_message);
+        console.log("added_message.between_message_ids.newer=",added_message.between_message_ids.newer);
       }
     }
     
@@ -1448,8 +1456,7 @@ if ("WebSocket" in window) {
       console.log("Attempting reconnect");
       setTimeout(connect_to_server(timeout_length_ms*2), timeout_length_ms);};
     } else {
-      //ws = new WebSocket("ws://" + window.location.host + "/myws");
-      ws = new WebSocket("ws://" + ngrok_link + "/myws");
+      ws = new WebSocket("ws://" + window.location.host + "/myws");
       ws.onclose = (err) => {console.log("ERROR: Error while connecting to server:",err);
       console.log("Attempting reconnect");
       setTimeout(connect_to_server(timeout_length_ms*2), timeout_length_ms);};
