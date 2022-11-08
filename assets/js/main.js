@@ -11,17 +11,20 @@ const userNotificationSound = document.querySelector("#userNotificationSound");
 const systemNotificationSound = document.querySelector("#systemNotificationSound");
 
 
-screenLock = false;
+screenLock = null;
 if('wakeLock' in navigator) {
-  navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+  if (screenLock !== null && document.visibilityState === 'visible') {
+    navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+  }
 }
 
 document.addEventListener('visibilitychange', () => {
   if('wakeLock' in navigator) {
-    navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+    if (screenLock !== null && document.visibilityState === 'visible') {
+      navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+    }
   }
 });
-
 
 
 
