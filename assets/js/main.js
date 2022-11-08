@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 const ngrok_link = "2f1d-99-112-76-183.ngrok.io";                                                                                                                                                                                                               
+=======
+const ngrok_link = "791b-2603-6080-9e00-80cf-00-1543.ngrok.io";                                                                                                                                                                                                 
+>>>>>>> origin
 //(DESC) Element defines from the webpage
 const chat = document.querySelector("#chat");
 const is_typing_box = document.querySelector("#is_typing_box");
@@ -25,8 +29,26 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+<<<<<<< HEAD
 inFullscreen = false;
+=======
+screenLock = null;
+if('wakeLock' in navigator) {
+  if (screenLock !== null && document.visibilityState === 'visible') {
+    navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+  }
+}
 
+document.addEventListener('visibilitychange', () => {
+  if('wakeLock' in navigator) {
+    if (screenLock !== null && document.visibilityState === 'visible') {
+      navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+    }
+  }
+});
+>>>>>>> origin
+
+inFullscreen = false;
 
 
 
