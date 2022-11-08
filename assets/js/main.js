@@ -1016,6 +1016,7 @@ if ("WebSocket" in window) {
     "list": "Get a list of all connected users",
     "clear": "Clear messages",
     "history (number of messages)": "Load chat history from logs",
+    "fullscreen": "Enter fullscreen mode",
     "link": "Generate a localtunnel link",
     "dark": "Set theme to dark",
     "light": "Set theme to light",
@@ -1774,6 +1775,17 @@ if ("WebSocket" in window) {
       case "history":
         message = ['h', args[1], message_ids_array[0]];
         return message;
+        break;
+      case "fullscreen":
+        if (fscreen.fullscreenEnabled) {
+          if (fscreen.fullscreenElement === app_wrapper) {
+            fscreen.exitFullscreen();
+          }
+          else {
+            fscreen.requestFullscreen(app_wrapper);
+          }
+        }
+        return false;
         break;
       case "link":
         message = ['u'];
