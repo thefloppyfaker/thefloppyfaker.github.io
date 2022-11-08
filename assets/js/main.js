@@ -1,4 +1,4 @@
-const ngrok_link = "5154-2603-6080-9e00-80cf-00-1543.ngrok.io";                                                                                                                                                                                                 
+const ngrok_link = "0bfb-2603-6080-9e00-80cf-00-1543.ngrok.io";                                                                                                                                                                                                 
 //(DESC) Element defines from the webpage
 const chat = document.querySelector("#chat");
 const is_typing_box = document.querySelector("#is_typing_box");
@@ -26,7 +26,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-
+inFullscreen = false;
 
 
 
@@ -1777,14 +1777,36 @@ if ("WebSocket" in window) {
         return message;
         break;
       case "fullscreen":
-        if (fscreen.fullscreenEnabled) {
-          if (fscreen.fullscreenElement === app_wrapper) {
-            fscreen.exitFullscreen();
-          }
-          else {
-            fscreen.requestFullscreen(app_wrapper);
+        var elem = document.documentElement;
+
+        /* View in fullscreen */
+        function openFullscreen() {
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+          } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
           }
         }
+
+        /* Close fullscreen */
+        function closeFullscreen() {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) { /* Safari */
+            document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) { /* IE11 */
+            document.msExitFullscreen();
+          }
+        }
+        if (inFullscreen) {
+          closeFullscreen();
+        } 
+        else {
+          openFullscreen();
+        }
+        inFullscreen = !inFullscreen;
         return false;
         break;
       case "link":
