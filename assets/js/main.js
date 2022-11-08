@@ -10,7 +10,12 @@ const callAudioElement = document.querySelector("#remoteAudio")
 const userNotificationSound = document.querySelector("#userNotificationSound");
 const systemNotificationSound = document.querySelector("#systemNotificationSound");
 
-
+let screenLock = await navigator.wakeLock.request('screen');
+document.addEventListener('visibilitychange', async () => {
+  if (screenLock !== null && document.visibilityState === 'visible') {
+    screenLock = await navigator.wakeLock.request('screen');
+  }
+});
 
 
 
