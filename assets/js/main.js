@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-const ngrok_link = "2f1d-99-112-76-183.ngrok.io";                                                                                                                                                                                                               
+const ngrok_link = "9a1d-2603-6080-9e00-80cf-a9a0-c500-1fea-cb09.ngrok.io";                                                                                                                                                                                                  
 =======
 const ngrok_link = "40e3-2603-6080-9e00-80cf-a9a0-c500-1fea-cb09.ngrok.io";                                                                                                                                                                                     
 >>>>>>> origin
