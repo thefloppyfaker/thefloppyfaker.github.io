@@ -1,4 +1,4 @@
-const ngrok_link = "0899-99-112-76-183.ngrok.io";                                                                                                                                                                                                               
+const ngrok_link = "2f1d-99-112-76-183.ngrok.io";                                                                                                                                                                                                               
 //(DESC) Element defines from the webpage
 const chat = document.querySelector("#chat");
 const is_typing_box = document.querySelector("#is_typing_box");
@@ -6,11 +6,26 @@ const message_box = document.querySelector("#message_box");
 const wipeBtn = document.querySelector("#wipe");
 const uploadBtn = document.querySelector("#upload");
 const sendBtn = document.querySelector("#send");
-const callAudioElement = document.querySelector("#remoteAudio")
+const callAudioElement = document.querySelector("#remoteAudio");
 const userNotificationSound = document.querySelector("#userNotificationSound");
 const systemNotificationSound = document.querySelector("#systemNotificationSound");
 
+screenLock = null;
+if('wakeLock' in navigator) {
+  if (screenLock !== null && document.visibilityState === 'visible') {
+    navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+  }
+}
 
+document.addEventListener('visibilitychange', () => {
+  if('wakeLock' in navigator) {
+    if (screenLock !== null && document.visibilityState === 'visible') {
+      navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+    }
+  }
+});
+
+inFullscreen = false;
 
 
 
@@ -1001,6 +1016,7 @@ if ("WebSocket" in window) {
     "list": "Get a list of all connected users",
     "clear": "Clear messages",
     "history (number of messages)": "Load chat history from logs",
+    "fullscreen": "Enter fullscreen mode",
     "link": "Generate a localtunnel link",
     "dark": "Set theme to dark",
     "light": "Set theme to light",
@@ -1759,6 +1775,39 @@ if ("WebSocket" in window) {
       case "history":
         message = ['h', args[1], message_ids_array[0]];
         return message;
+        break;
+      case "fullscreen":
+        var elem = document.documentElement;
+
+        /* View in fullscreen */
+        function openFullscreen() {
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+          } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+          }
+        }
+
+        /* Close fullscreen */
+        function closeFullscreen() {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) { /* Safari */
+            document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) { /* IE11 */
+            document.msExitFullscreen();
+          }
+        }
+        if (inFullscreen) {
+          closeFullscreen();
+        } 
+        else {
+          openFullscreen();
+        }
+        inFullscreen = !inFullscreen;
+        return false;
         break;
       case "link":
         message = ['u'];
