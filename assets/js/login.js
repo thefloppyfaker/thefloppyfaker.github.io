@@ -1,3 +1,19 @@
+//(DESC) Preload what needs to be preloaded, then run everything else.
+async function preload_data() {
+  const preloaded = {};
+
+  //(DESC) Fetch config
+  preloaded.config = await (await fetch("assets/data/web_config.json")).json();
+
+  return preloaded;
+};
+
+preload_data().then((preloaded) => {
+
+
+
+
+
 //(DESC) Returns an object 
 // login_page = {
 //   login_page_element: HTMLElement, 
@@ -173,7 +189,7 @@ function change_login_step(login_page_element, login_step="") {
       }
       if (this_element.hasAttribute("disabled")) return;
 
-      submit_form("login", {email: email_input_element.value, password: password_input_element.value});
+      authenticate("login", {email: email_input_element.value, password: password_input_element.value});
     });
 
     login_page.login_page_input_elements.cancel_button.addEventListener('click', () => {change_login_step(login_page.login_page_element, "signup")});
@@ -192,7 +208,7 @@ function change_login_step(login_page_element, login_step="") {
       }
       if (this_element.hasAttribute("disabled")) return;
 
-      submit_form("signup", {username: username_input_element.value, email: email_input_element.value, password: password_input_element.value});
+      authenticate("signup", {username: username_input_element.value, email: email_input_element.value, password: password_input_element.value});
     });
 
     login_page.login_page_input_elements.cancel_button.addEventListener('click', () => {change_login_step(login_page.login_page_element, "login")});
@@ -208,7 +224,7 @@ function change_login_step(login_page_element, login_step="") {
       }
       if (this_element.hasAttribute("disabled")) return;
 
-      submit_form("forgor", {email: email_input_element.value});
+      authenticate("forgor", {email: email_input_element.value});
     });
 
     login_page.login_page_input_elements.forgot_password_button.addEventListener('click', () => {change_login_step(login_page.login_page_element, "signup")});
@@ -240,23 +256,56 @@ change_login_step(null, "login");
 
 
 
-//(DESC) Submits a form to the server based on login type.
+//(DESC) Posts json data to a url and returns the response
+async function submit_data(url, data) {
+  response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  return await response.json();
+}
+
+//(DESC) Authenticate with the server based on login_step
 //(ARGS) login_step: "login" | "signup" | "forgor",
 //       data: {data-type: value, data-type: value, etc.}
-function submit_form(login_step, data) {
+async function authenticate(login_step, data) {
+  let auth_url = `${location.protocol}//${preloaded.config.ngrok_url}/auth`;
+  if (window.location.hostname === "localhost") {
+    auth_url = `${location.protocol}//${window.location.host}/auth`;
+  }
+  let server_response;
+
   if (login_step === "login") {
     //(DESC) User is logging in. Object.keys(data) = ["email", "password"]
-    alert(`Log in\ndata: ${JSON.stringify(data)}`);
+    server_response = await submit_data(`${auth_url}/login`, data);
+
+    console.log("data=",JSON.stringify(data)); 
+    console.log("server_response=",server_response);
+    //alert(`Log in\ndata: ${JSON.stringify(data)}`);
   }
   else if (login_step === "signup") {
     //(DESC) User is signing up. Object.keys(data) = ["username", "email", "password"]
+    server_response = await submit_data(`${auth_url}/signup`, data);
+
+    console.log("data=",JSON.stringify(data)); 
+    console.log("server_response=",server_response);
     alert(`Sign up\ndata: ${JSON.stringify(data)}`);
   }
   else if (login_step === "forgor") {
     //(DESC) User forgor their password. Object.keys(data) = ["email"]
+    server_response = await submit_data(`${auth_url}/forgor`, data);
+
+    console.log("data=",JSON.stringify(data)); 
+    console.log("server_response=",server_response);
     alert(`Forgot password\ndata: ${JSON.stringify(data)}`);
   }
   else {
     console.log("ERROR: Invalid login_step in sumbin_form function!!! login_step=",login_step);
   }
 }
+
+}); //(NOTE) This is the preload_data().then() closing statement

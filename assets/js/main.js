@@ -2255,4 +2255,4 @@ dropZone.addEventListener('dragleave', function(ev) {
 dropZone.addEventListener('drop', dropHandler);
 
 
-}); //(NOTE) This is the preload_data.then closing statement
+}); //(NOTE) This is the preload_data().then() closing statement
