@@ -1,4 +1,20 @@
-const ngrok_link = "7065-2603-6080-9e00-80cf-a9a0-c500-1fea-cb09.ngrok.io";                                                                                                                                                                                     
+
+//(DESC) Preload what needs to be preloaded, then run everything else.
+async function preload_data() {
+  const preloaded = {};
+
+  //(DESC) Fetch config
+  preloaded.config = await (await fetch("assets/data/web_config.json")).json();
+
+  //(DESC) Fetch and define emoji table
+  preloaded.emoji_definitions = await (await fetch("assets/data/emoji_definitions.json")).json();
+
+  return preloaded;
+};
+
+preload_data.then((preloaded) => {
+console.log("config =",preloaded.config);
+
 //(DESC) Element defines from the webpage
 const chat = document.querySelector("#chat");
 const is_typing_box = document.querySelector("#is_typing_box");
@@ -26,6 +42,8 @@ document.addEventListener('visibilitychange', () => {
 });
 
 inFullscreen = false;
+
+
 
 
 
@@ -261,13 +279,6 @@ refresh_token = "";
 
 
 
-//(DESC) Fetch and define emoji table
-emoji_definitions = {};
-fetch("assets/data/emoji_definitions.json").then(async (resp) => {
-    emoji_definitions = await resp.json();
-})
-
-
 //(DESC) Marked.js custom code
 const renderer = {
   html(string) {
@@ -418,8 +429,8 @@ const emoji = {
     }
   },
   renderer(token) {
-    if (emoji_definitions.hasOwnProperty(token.child_tokens[0]?.text)) {
-      return emoji_definitions[token.child_tokens[0].text];
+    if (preloaded.emoji_definitions.hasOwnProperty(token.child_tokens[0]?.text)) {
+      return preloaded.emoji_definitions[token.child_tokens[0].text];
     }
     else {
       if (token.child_tokens[0]) {
@@ -1465,7 +1476,7 @@ if ("WebSocket" in window) {
     //(NOTE) This links to the websocket proxy
     if (location.protocol === "https:") {
       //ws = new WebSocket("wss://" + window.location.host + "/myws");
-      ws = new WebSocket("wss://" + ngrok_link + "/myws");
+      ws = new WebSocket("wss://" + preloaded.config.ngrok_url + "/myws");
       ws.onclose = (err) => {console.log("ERROR: Error while connecting to server:",err);
       console.log("Attempting reconnect");
       setTimeout(connect_to_server(timeout_length_ms*2), timeout_length_ms);};
@@ -2245,3 +2256,4 @@ dropZone.addEventListener('dragleave', function(ev) {
 dropZone.addEventListener('drop', dropHandler);
 
 
+}); //(NOTE) This is the preload_data.then closing statement
