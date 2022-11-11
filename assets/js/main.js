@@ -1,4 +1,3 @@
-
 //(DESC) Preload what needs to be preloaded, then run everything else.
 async function preload_data() {
   const preloaded = {};
@@ -12,7 +11,7 @@ async function preload_data() {
   return preloaded;
 };
 
-preload_data.then((preloaded) => {
+preload_data().then((preloaded) => {
 console.log("config =",preloaded.config);
 
 //(DESC) Element defines from the webpage
