@@ -528,6 +528,8 @@ if (muted) {
 }
 
 keepalive_timeout_id = false;
+isReconnecting = false;
+
 
 //(TODO) Add cached property that can have values false, "above", or "below" to each message
 
@@ -1510,11 +1512,13 @@ if ("WebSocket" in window) {
       ws = new WebSocket("wss://" + preloaded.config.ngrok_url + "/myws");
       ws.onclose = (err) => {console.log("ERROR: Error while connecting to server:",err);
       console.log("Attempting reconnect");
+      isReconnecting = true;
       setTimeout(connect_to_server(timeout_length_ms*2), timeout_length_ms);};
     } else {
       ws = new WebSocket("ws://" + window.location.host + "/myws");
       ws.onclose = (err) => {console.log("ERROR: Error while connecting to server:",err);
       console.log("Attempting reconnect");
+      isReconnecting = true;
       setTimeout(connect_to_server(timeout_length_ms*2), timeout_length_ms);};
     }
     
@@ -1525,8 +1529,18 @@ if ("WebSocket" in window) {
       timeout_length_ms = 50;
       if (refresh_token) {
         sendTo(ws, ['r', refresh_token]);
+
+        //(TODO) Ask for any messages that we missed if we're reconnecting
+        ////////////////message = ['h', args[1], message_ids_array[0]];
+        if (isReconnecting) {
+          isReconnecting = false;
+          if (message_ids_array.length > 0) {
+            sendTo(ws, ['f', null, message_ids_array[Math.max(message_ids_array.length-6, 0)]]);
+          }
+        }
       }
       else {
+        //(NOTE) THIS SHOULD NEVER BE RUN!!!!!
         sendTo(ws, ['r']);
         //showMessage(new ChatMessage("", system_ChatUser, "Reconnecting to Server..."));
       }
