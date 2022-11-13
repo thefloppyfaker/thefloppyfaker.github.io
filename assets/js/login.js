@@ -269,6 +269,45 @@ async function submit_data(url, data) {
   return await response.json();
 }
 
+function authentication_server_response_error_handler(server_response) {
+  let error_type = server_response.error[0];
+  let error_message = server_response.error[1];
+  Array.from(document.getElementsByClassName("login_form_input_content")).forEach((element) => {
+    element.setAttribute("error", "error");
+  });
+
+  if (error_type === "general") {
+    //(DESC) Turn all values red and put this below the header
+    //(TODO) The rest of the work
+    console.log(`General error: ${error_message}`);
+    alert(`General error: ${error_message}`);
+  }
+  else if (error_type === "username") {
+    //(DESC) Turn all values red and put this in the username input field label
+    //(TODO) The rest of the work
+    console.log(`Username error: ${error_message}`);
+    alert(`Username error: ${error_message}`);
+  }
+  else if (error_type === "email") {
+    //(DESC) Turn all values red and put this in the email input field label
+    //(TODO) The rest of the work
+    console.log(`Email error: ${error_message}`);
+    alert(`Email error: ${error_message}`);
+  }
+  else if (error_type === "password") {
+    //(DESC) Turn all values red and put this in the password input field label
+    //(TODO) The rest of the work
+    console.log(`Password error: ${error_message}`);
+    alert(`Password error: ${error_message}`);
+  }
+  else {
+    //(DESC) Turn all values red and put this below the header
+    //(TODO) The rest of the work
+    console.log(`Unknown error: ${error_message}`);
+    alert(`Unknown error: ${error_message}`);
+  }
+}
+
 //(DESC) Authenticate with the server based on login_step
 //(ARGS) login_step: "login" | "signup" | "forgor",
 //       data: {data-type: value, data-type: value, etc.}
@@ -282,26 +321,44 @@ async function authenticate(login_step, data) {
   if (login_step === "login") {
     //(DESC) User is logging in. Object.keys(data) = ["email", "password"]
     server_response = await submit_data(`${auth_url}/login`, data);
+    if (server_response.hasOwnProperty("error")) {
+      authentication_server_response_error_handler(server_response);
+      return;
+    }
 
-    console.log("data=",JSON.stringify(data)); 
-    console.log("server_response=",server_response);
+    localStorage.setItem("token", server_response.token);
+    window.location.replace(`${location.protocol}//${window.location.host}`);
+    
+    //console.log("data=",JSON.stringify(data)); 
+    //console.log("server_response=",server_response);
     //alert(`Log in\ndata: ${JSON.stringify(data)}`);
   }
   else if (login_step === "signup") {
     //(DESC) User is signing up. Object.keys(data) = ["username", "email", "password"]
     server_response = await submit_data(`${auth_url}/signup`, data);
+    if (server_response.hasOwnProperty("error")) {
+      authentication_server_response_error_handler(server_response);
+      return;
+    }
 
-    console.log("data=",JSON.stringify(data)); 
-    console.log("server_response=",server_response);
-    alert(`Sign up\ndata: ${JSON.stringify(data)}`);
+    localStorage.setItem("token", server_response.token);
+    window.location.replace(`${location.protocol}//${window.location.host}`);
+
+    //console.log("data=",JSON.stringify(data)); 
+    //console.log("server_response=",server_response);
+    //alert(`Sign up\ndata: ${JSON.stringify(data)}`);
   }
   else if (login_step === "forgor") {
     //(DESC) User forgor their password. Object.keys(data) = ["email"]
     server_response = await submit_data(`${auth_url}/forgor`, data);
+    if (server_response.hasOwnProperty("error")) {
+      authentication_server_response_error_handler(server_response);
+      return;
+    }
 
-    console.log("data=",JSON.stringify(data)); 
-    console.log("server_response=",server_response);
-    alert(`Forgot password\ndata: ${JSON.stringify(data)}`);
+    //console.log("data=",JSON.stringify(data)); 
+    //console.log("server_response=",server_response);
+    //alert(`Forgot password\ndata: ${JSON.stringify(data)}`);
   }
   else {
     console.log("ERROR: Invalid login_step in sumbin_form function!!! login_step=",login_step);

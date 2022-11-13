@@ -1,3 +1,15 @@
+//(DESC) Posts json data to a url and returns the response
+async function submit_data(url, data) {
+  response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  return await response.json();
+}
 //(DESC) Preload what needs to be preloaded, then run everything else.
 async function preload_data() {
   const preloaded = {};
@@ -8,10 +20,30 @@ async function preload_data() {
   //(DESC) Fetch and define emoji table
   preloaded.emoji_definitions = await (await fetch("assets/data/emoji_definitions.json")).json();
 
+  //(DESC) Check if there is a token in localstorage
+  if (localStorage.getItem("token")) {
+    let auth_url = `${location.protocol}//${preloaded.config.ngrok_url}/auth`;
+    if (window.location.hostname === "localhost") {
+      auth_url = `${location.protocol}//${window.location.host}/auth`;
+    }
+    let server_response = await submit_data(`${auth_url}/token`, {token: localStorage.getItem("token")});
+    if (server_response.hasOwnProperty("error")) {
+      //(DESC) Server sent us an error (token is probably invalid). Go back to the login page.
+      window.location.replace(`${location.protocol}//${window.location.host}/login`);
+      return; //(NOTE) Should never be run
+    }
+
+    preloaded.our_ChatUser = server_response.user;
+  } else {
+    //(DESC) There isn't a login token in localStorage. Go back to the login page.
+    window.location.replace(`${location.protocol}//${window.location.host}/login`);
+    return; //(NOTE) Should never be run
+  }
   return preloaded;
 };
 
 preload_data().then((preloaded) => {
+if (!preloaded) return; //(NOTE) This is just here to stop the function if it's running ahead of the above window.location.replace
 console.log("config =",preloaded.config);
 
 //(DESC) Element defines from the webpage
@@ -249,8 +281,8 @@ class ChatMessage extends Base {
 }
 
 const system_ChatUser = new ChatUser("1337", "SYSTEM");
-our_ChatUser = new ChatUser();
-refresh_token = "";
+our_ChatUser = preloaded.our_ChatUser; //(CODE) our_ChatUser = new ChatUser();
+refresh_token = localStorage.getItem("token"); //(CODE) refresh_token = "";
 
 
 
@@ -1510,7 +1542,7 @@ if ("WebSocket" in window) {
         }
         switch (data[0]) {
           case 'r': //(DESC) Refresh token
-            refresh_token = data[1];
+            //refresh_token = data[1];
             break;
           case 'k': //(DESC) Keepalive
             if (keepalive_timeout_id === false) { //(DESC) If keepalive_timeout_id is not false, then the server has tried to start another keepalive (this may happen upon reconnecting) which we should ignore. 
