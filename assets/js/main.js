@@ -44,18 +44,21 @@ async function preload_data() {
 
 preload_data().then((preloaded) => {
 if (!preloaded) return; //(NOTE) This is just here to stop the function if it's running ahead of the above window.location.replace
-console.log("config =",preloaded.config);
 
 //(DESC) Element defines from the webpage
-const chat = document.querySelector("#chat");
-const is_typing_box = document.querySelector("#is_typing_box");
-const message_box = document.querySelector("#message_box");
-const wipeBtn = document.querySelector("#wipe");
-const uploadBtn = document.querySelector("#upload");
-const sendBtn = document.querySelector("#send");
-const callAudioElement = document.querySelector("#remoteAudio");
-const userNotificationSound = document.querySelector("#userNotificationSound");
-const systemNotificationSound = document.querySelector("#systemNotificationSound");
+const chat = document.getElementById("chat");
+const is_typing_box = document.getElementById("is_typing_box");
+const message_box = document.getElementById("message_box");
+const wipeBtn = document.getElementById("wipe");
+const uploadBtn = document.getElementById("upload");
+const sendBtn = document.getElementById("send");
+const callAudioElement = document.getElementById("remoteAudio");
+const userNotificationSound = document.getElementById("userNotificationSound");
+const systemNotificationSound = document.getElementById("systemNotificationSound");
+const theme = document.getElementById("theme");
+const jinglingSound = document.getElementById("jinglingSound");
+jinglingSound.fadingIn = false;
+jinglingSound.fadingOut = false;
 
 screenLock = null;
 if('wakeLock' in navigator) {
@@ -529,6 +532,8 @@ if (muted) {
 
 keepalive_timeout_id = false;
 isReconnecting = false;
+isSnowing = false;
+sf = null; //(DESC) Snowflake placeholder
 
 
 //(TODO) Add cached property that can have values false, "above", or "below" to each message
@@ -887,42 +892,83 @@ function check_chat_elements_above_and_below() {
   }
 }
 
+
+
 chat_wrapper.addEventListener("scroll", (ev) => {
   check_chat_elements_above_and_below();
 });
 
-//(DESC) Prevent users from pasting anything other than plain-text into the message box
-message_box.addEventListener('paste', function (e) {
-  // Prevent the default action
-  e.preventDefault();
+//(DESC) Prevent users from pasting anything other than plain-text and files into the message box
+message_box.addEventListener("paste", function (ev) {
+  let this_element = ev.target;
+  if (!ev.target && ev.srcElement) {
+    this_element = ev.srcElement;
+  }
+  // Prevent the default action (if text, it would paste rich text into box)
+  ev.preventDefault();
 
   // Get the copied text from the clipboard
-  const text = (e.clipboardData
-      ? (e.originalEvent || e).clipboardData.getData('text/plain')
-      : // For IE
-      window.clipboardData
-      ? window.clipboardData.getData('Text')
-      : '');
-
-  // Insert text at the current position of caret
-  const range = document.getSelection().getRangeAt(0);
-  range.deleteContents();
+  const pasted_text = ((ev.clipboardData
+    ? (ev.originalEvent || ev).clipboardData.getData('text/plain')
+    : // For IE
+    window.clipboardData
+    ? window.clipboardData.getData('Text')
+    : '')).replace(/[\x00-\x09\x0B-\x1F\x7F]/g, "");   //(DESC) Remove all ascii control characters (\x00-\x1F) except for newline (\x0A). Also remove the DEL character (\x7F).
   
-  const textNode = document.createTextNode(text);
+  
+  // Insert text at the current position of caret
+  const range = document.getSelection().getRangeAt(0); //(DESC) Get the selected text
+  const current_text = this_element.textContent;
+  const current_selection = [range.startOffset, range.endOffset];
+  range.deleteContents(); //(DESC) Delete the currently selected text
+
+  let offset_from_text_in_previous_nodes = 0;
+  let current_element_being_iterated_over = range.startContainer;
+  while (true) {
+    if (current_element_being_iterated_over.previousSibling && current_element_being_iterated_over !== this_element) {
+      current_element_being_iterated_over = current_element_being_iterated_over.previousSibling;
+      offset_from_text_in_previous_nodes += current_element_being_iterated_over.length;
+    }
+    else {
+      break;
+    }
+  }
+  
+  let offset_index = offset_from_text_in_previous_nodes + current_selection[0];
+
+  let new_text = current_text.slice(0, offset_index) + pasted_text + current_text.slice(offset_index);
+  this_element.textContent = new_text;
+  
+  let new_range = document.createRange();
+  new_range.setStart(this_element.firstChild, offset_from_text_in_previous_nodes + current_selection[0]);
+  new_range.setEnd(this_element.firstChild, offset_from_text_in_previous_nodes + current_selection[0] + pasted_text.length);
+
+  new_range.collapse(false);
+
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(new_range);
+
+  /*
+  // Insert text at the current position of caret
+  const range = document.getSelection().getRangeAt(0); //(DESC) Get the selected text
+  range.deleteContents(); //(DESC) Delete all selected text
+  
+  const textNode = document.createTextNode(pasted_text);
   range.insertNode(textNode);
   range.selectNodeContents(textNode);
   range.collapse(false);
 
   const selection = window.getSelection();
   selection.removeAllRanges();
-  selection.addRange(range);
+  selection.addRange(range);*/
 
 
   //(DESC) Handle it if it's a file
-  if (e.clipboardData) {
-    if (e.clipboardData.items) {
+  if (ev.clipboardData) {
+    if (ev.clipboardData.items) {
       // Use DataTransferItemList interface to access the file(s)
-      items = [...e.clipboardData.items];
+      items = [...ev.clipboardData.items];
       image_files = items.filter(({kind, type}) => kind === "file" && (type.startsWith("image/") || type.startsWith("img/")));
 
       if (image_files.length > 0) {
@@ -930,7 +976,7 @@ message_box.addEventListener('paste', function (e) {
       }
     } else {
       // Use DataTransfer interface to access the file(s)
-      [...e.clipboardData.files].forEach((file, i) => {
+      [...ev.clipboardData.files].forEach((file, i) => {
         handleImageFileUpload(file, i);
       });
     }
@@ -1012,7 +1058,7 @@ document.addEventListener("keydown", function (event) {
   key_code = cross_browser_keycode(event);
   if (key_code === 27 || key_code === "Escape") { //(NOTE) Escape
     chat.innerHTML = "";
-    message_box.innerHTML = ""
+    message_box.innerHTML = "";
     event.preventDefault();
   }
 });
@@ -1043,7 +1089,13 @@ document.addEventListener("keydown", function (event) {
 
 
 
-
+jinglingSound.addEventListener('timeupdate', function(){
+  var buffer = .2;
+  if(this.currentTime > this.duration - buffer){
+    this.currentTime = 0;
+    this.play();
+  }
+});
 
 //(DESC) All websocket-related code
 if ("WebSocket" in window) {
@@ -1060,38 +1112,45 @@ if ("WebSocket" in window) {
     "history (number of messages)": "Load chat history from logs",
     "fullscreen": "Enter fullscreen mode",
     "link": "Generate a localtunnel link",
-    "dark": "Set theme to dark",
-    "light": "Set theme to light",
-    "call audio (nickname)": "Initiate an audio call with a user",
-    "call video (nickname)": "Initiate a video call with a user",
-    "call accept": "Accept an incoming call",
-    "call cancel": "Cancel an outgoing call",
-    "call reject": "Reject an incoming call",
-    "call leave": "Leave your current call",
+    "theme (name|list)": "Set theme or list available themes",
+    "call (audio|video) (nickname)": "Initiate a call with a user",
+    "call (accept|reject|cancel|leave)": "Change call state",
   }
 
-  function getCommandsString() {
-    //(DESC) Format and return a string of commands from the commands object.
-    parsedCommandsString = "";
-    commands_spacing = 10;
-    Object.keys(commands).forEach(function(command) {
-      command_length = ('/' + command).length;
-      if (command_length >= commands_spacing - 5) {
-        commands_spacing = (command_length - (command_length % 5)) + 10;
+  /**
+   * Format and return the key values pairs of an object as a string using spaces and indentation
+   * @function create_text_table
+   * @param {Object} table_object - The object to generate the table from
+   * @param {string} [title] - A bolded title above the table
+   * @param {string} [prefix] - A string to be put before each line in the table
+   * @param {string} [suffix] - A string to be put after each line in the table
+   * @returns {string} - The formatted table
+   */
+  function create_text_table(table_object, title="", prefix="", suffix="") {
+    //(DESC) Format and return a string with a "table," using the contents of table_object
+    let parsedTableString = "";
+    if (title) parsedTableString += `**${title}:**\n`;
+
+    let line_spacing = 10;
+    Object.keys(table_object).forEach(function(item) {
+      let item_length = (prefix + item).length;
+      if (item_length >= line_spacing - 5) {
+        line_spacing = (item_length - (item_length % 5)) + 10;
       }
     });
 
-    Object.entries(commands).forEach(function([command, definition]) {
-      command_spaces = ' '.repeat(commands_spacing - ('/' + command).length);
-      parsedCommandsString += '`/' + command + command_spaces + definition + '`\n';
+    Object.entries(table_object).forEach(function([item, definition]) {
+      let line_spaces = ' '.repeat(line_spacing - (prefix + item).length);
+      if (Array.isArray(definition)) definition = definition.join(" | ");
+      parsedTableString += '`' + prefix + item + line_spaces + definition + suffix + '`' + '\n';
     });
 
-    //(DESC) Remove trailing whitespace (this would also remove leading whitespace but we don't have that.)
-    //(CODE) parsedCommandString = parsedCommandString.trim();
-    parsedCommandsString = parsedCommandsString.slice(0, -1);
+    //(DESC) Remove the trailing whitespace character
+    parsedTableString = parsedTableString.slice(0, -1);
 
-    return parsedCommandsString;
+    return parsedTableString;
   }
+
 
   //(DESC) Stop both mic and camera
   function stopBothVideoAndAudio(stream) {
@@ -1765,7 +1824,7 @@ if ("WebSocket" in window) {
       update_is_typing_box();
     }
   }
-
+  
   function update_is_typing_box() {
     if (typing_users.length == 0) {
       is_typing_box.innerHTML = "";
@@ -1801,7 +1860,8 @@ if ("WebSocket" in window) {
     switch (args[0].toLowerCase()) {
       case "help":
         //showMessage("sys", "SYSTEM", `Commands:\n/help                         Show this list\n/list                         Get a list of all connected users\n/nick (nickname)              Change your nickname\n/call audio (nickname)        Initiate an audio call with a user\n/call video (nickname)        Initiate a video call with a user\n/call accept                  Accept an incoming call\n/call cancel                  Cancel an outgoing call\n/call reject                  Reject an incoming call\n/call leave                   Leave your current call\n`);
-        showMessage(new ChatMessage("", system_ChatUser, "**Commands:**\n" + getCommandsString()));
+        //showMessage(new ChatMessage("", system_ChatUser, "**Commands:**\n" + getCommandsString()));
+        showMessage(new ChatMessage("", system_ChatUser, create_text_table(commands, title="Commands", prefix='/')));
         //systemNotificationSound.play().catch(err => console.log(err));
         return false;
         break;
@@ -1867,32 +1927,180 @@ if ("WebSocket" in window) {
         message = ['u'];
         return message;
         break;
-      case "dark":
-        //(DESC) Set theme to dark
-        //document.styleSheets[1].disabled = true;
-        //document.styleSheets[2].disabled = false;
-        var theme = document.getElementById("theme");
-        if (theme.getAttribute("href") !== "assets/css/darkmode.css") {
-          theme.setAttribute("href", "assets/css/darkmode.css");
-          showMessage(new ChatMessage("", system_ChatUser, "Theme set to dark"));
-        } else {
-          showMessage(new ChatMessage("", system_ChatUser, "Theme is already set to dark"));
+      case "theme":
+        //(DESC) Set theme
+        //(DESC) theme_aliases = {"css_theme_file_name": ["alias1", "alias2", etc], etc}
+        const theme_aliases = {"darkmode": ["dark", "darkmode"], "lightmode": ["light", "lightmode"], "bluemode": ["blue", "bluemode"], "darkbluemode": ["darkblue", "darkbluemode"]};
+
+        if (args.length < 2) {
+          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least one argument. Type /help for a list of commands."));
+          return false;
         }
-        //systemNotificationSound.play().catch(err => console.log(err));
+        let formatted_theme_arg = args[1].normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x21-\x7E\x80-\xFE]+/gi, "").toLowerCase();
+        if (formatted_theme_arg === "") {
+          showMessage(new ChatMessage("", system_ChatUser, "Argument 1 is missing or invalid. Type /help for a list of commands."));
+          return false;
+        }
+
+        if (formatted_theme_arg === "list") {
+          showMessage(new ChatMessage("", system_ChatUser, create_text_table(theme_aliases, title="Themes")));
+          return false;
+        }
+
+        let chosen_theme_filename = "";
+        Object.entries(theme_aliases).every(([theme_filename, aliases]) => {
+          console.log("aliases:",aliases);
+          console.log("formatted_theme_arg:",formatted_theme_arg);
+          if (aliases.includes(formatted_theme_arg)) {
+            chosen_theme_filename = theme_filename;
+            return false;
+          }
+          return true;
+        });
+
+        if (chosen_theme_filename === "") {
+          showMessage(new ChatMessage("", system_ChatUser, `Invalid theme name "${formatted_theme_arg}". Type  /theme list  for a list of themes.`));
+          return false;
+        }
+
+        if (theme.getAttribute("href") !== `assets/css/themes/${chosen_theme_filename}.css`) {
+          theme.setAttribute("href", `assets/css/themes/${chosen_theme_filename}.css`);
+          theme.setAttribute("data-theme", chosen_theme_filename);
+          if (isSnowing) {
+            /*sf.stop();
+            sf.destroy();
+            let snowflake_parameters = {
+              container: document.body,
+              color: "#000000",
+              count: 10,
+              speed: 2,
+              wind: true,
+              zIndex: 0
+            };*/
+            let new_snowflake_color = "#000000";
+            if (chosen_theme_filename === "lightmode") new_snowflake_color = "#000000";
+            else if (chosen_theme_filename === "darkmode") new_snowflake_color = "#FFFFFF";
+            else if (chosen_theme_filename === "bluemode") new_snowflake_color = "#FFFFFF";
+            else if (chosen_theme_filename === "darkbluemode") new_snowflake_color = "#FFFFFF";
+
+
+            //sf = new Snowflakes(snowflake_parameters);
+            sf.imagesStyleNode.innerHTML = sf.imagesStyleNode.innerHTML.replace(new RegExp(`fill='${encodeURIComponent(sf.params.color)}'`, 'g'), `fill='${encodeURIComponent(new_snowflake_color)}'`);
+            sf.params.color = new_snowflake_color;
+          }
+          showMessage(new ChatMessage("", system_ChatUser, `Theme set to ${formatted_theme_arg}`));
+        } else {
+          showMessage(new ChatMessage("", system_ChatUser, `Theme is already set to ${formatted_theme_arg}`));
+        }
+
         return false;
         break;
-      case "light":
-        //(DESC) Set theme to light
-        //document.styleSheets[1].disabled = false;
-        //document.styleSheets[2].disabled = true;
-        var theme = document.getElementById("theme");
-        if (theme.getAttribute("href") !== "assets/css/lightmode.css") {
-          theme.setAttribute("href", "assets/css/lightmode.css");
-          showMessage(new ChatMessage("", system_ChatUser, "Theme set to light"));
-        } else {
-          showMessage(new ChatMessage("", system_ChatUser, "Theme is already set to light"));
+      case "stfu":
+        jinglingSound.pause();
+        return false;
+        break;
+      case "snow":
+        if (!Snowflakes) return;
+        if (isSnowing) {
+          //sf.stop();
+          sf.destroy();
+          isSnowing = false;
+          if (args.length === 1) {
+            jinglingSound.fadingOut = true;
+            if (jinglingSound.fadingIn) {
+              jinglingSound.fadingIn = false;
+            }
+            const fadeAudioOut = setInterval(() => {
+              if (jinglingSound.volume !== 0) {
+                jinglingSound.volume -= 0.005;
+              }
+            
+              if (jinglingSound.volume <= .003 || !jinglingSound.fadingOut) {
+                clearInterval(fadeAudioOut);
+                jinglingSound.pause();
+                jinglingSound.fadingOut = false;
+              }
+            }, 20);
+            return false;
+          }
         }
-        //systemNotificationSound.play().catch(err => console.log(err));
+        
+        
+        //jinglingSound.setAttribute("loop", "loop");
+        jinglingSound.volume = 0;
+        jinglingSound.play();
+        const fadeAudioIn = setInterval(() => {
+          jinglingSound.fadingIn = true;
+          if (jinglingSound.fadingOut) {
+            jinglingSound.fadingOut = false;
+          }
+          if (jinglingSound.volume < .253) {
+            jinglingSound.volume += 0.001;
+          }
+        
+          if (jinglingSound.volume >= .253 || !jinglingSound.fadingIn) {
+            clearInterval(fadeAudioIn);
+            jinglingSound.fadingIn = false;
+          }
+        }, 20);
+
+        let snowflake_parameters = {
+          color: '#5ECDEF', // Default: "#5ECDEF"
+          count: 25, // Default: 50
+          minOpacity: 0.6, // From 0 to 1. Default: 0.6
+          maxOpacity: 1, // From 0 to 1. Default: 1
+          minSize: 10, // Default: 10
+          maxSize: 25, // Default: 25
+          rotation: true, // Default: true
+          speed: 1, // The property affects the speed of falling. Default: 1
+          wind: true, // Without wind. Default: true
+
+          container: document.body, // Default: document.body
+          zIndex: 0 // Default: 9999
+        };
+        if (theme.getAttribute("data-theme") === "lightmode") snowflake_parameters.color = "#000000";
+        else if (theme.getAttribute("data-theme") === "darkmode") snowflake_parameters.color = "#FFFFFF";
+        else if (theme.getAttribute("data-theme") === "bluemode") snowflake_parameters.color = "#FFFFFF";
+        else if (theme.getAttribute("data-theme") === "darkbluemode") snowflake_parameters.color = "#FFFFFF";
+
+
+        args.shift(); //(DESC) Remove the "snow" argument
+        let formatted_args = args.join(" ").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\x7E\x80-\xFE]+/gi, "").toLowerCase();
+        let color_value_matcher = `"*([#]*[a-z0-9().,]+)"*`;
+        let integer_value_matcher = `"*([0-9]+)"*`;
+        let decimal_value_matcher = `"*([0-9.]+)"*`;
+        let boolean_value_matcher = `"*(true|false|yes|no)"*`;
+
+        let snowflake_parameter_matchers = {
+          "color": color_value_matcher,
+          "count": integer_value_matcher,
+          "speed": integer_value_matcher,
+          "wind": boolean_value_matcher,
+          "minOpacity": decimal_value_matcher,
+          "maxOpacity": decimal_value_matcher,
+          "minSize": integer_value_matcher,
+          "maxSize": integer_value_matcher, 
+          "rotation": boolean_value_matcher
+        };
+
+        Object.entries(snowflake_parameter_matchers).forEach(([snowflake_parameter, parameter_type_matcher]) => {
+          let property_name_matcher = `(?:${snowflake_parameter}[:=]*)`;
+          let search_regex = new RegExp(property_name_matcher+parameter_type_matcher, 'i');
+          let match_array = formatted_args.match(search_regex);
+          if (match_array) {
+            if (match_array[1] === "true" || match_array[1] === "yes" || match_array[1] === "on") match_array[1] = true;
+            else if (match_array[1] === "false" || match_array[1] === "no" || match_array[1] === "off") match_array[1] = false;
+            
+            if (parameter_type_matcher === integer_value_matcher) {
+              match_array[1] = Number(match_array[1]);
+            }
+            snowflake_parameters[snowflake_parameter] = match_array[1]; //encodeURIComponent(match_array[1]);
+          }
+        });
+
+        sf = new Snowflakes(snowflake_parameters);
+                  
+        isSnowing = true;
         return false;
         break;
       case "call":
@@ -1900,7 +2108,7 @@ if ("WebSocket" in window) {
           showMessage(new ChatMessage("", system_ChatUser, "This command must have at least one argument. Type /help for a list of commands."));
           //systemNotificationSound.play().catch(err => console.log(err));
           return false;
-        } else if (args[1] == "" || args[1] == ' ') {
+        } else if (args[1] === "" || args[1] === ' ') {
           showMessage(new ChatMessage("", system_ChatUser, "This command must have at least one argument. Type /help for a list of commands."));
           //systemNotificationSound.play().catch(err => console.log(err));
           return false;
@@ -1912,7 +2120,7 @@ if ("WebSocket" in window) {
                 //systemNotificationSound.play().catch(err => console.log(err));
                 return false;
               } else {
-                if (args[2] == "" || args[2] == ' ') {
+                if (args[2] === "" || args[2] === ' ') {
                   showMessage(new ChatMessage("", system_ChatUser, "You must enter a nickname to call someone. Type /help for a list of commands."));
                   //systemNotificationSound.play().catch(err => console.log(err));
                   return false;
@@ -2032,9 +2240,21 @@ if ("WebSocket" in window) {
               //(CODE) }
               break;
             default:
-              showMessage(new ChatMessage("", system_ChatUser, `Unknown subcommand: "${args[1]}". Type /help for a list of commands.`));
-              //systemNotificationSound.play().catch(err => console.log(err));
-              return false;
+              //showMessage(new ChatMessage("", system_ChatUser, `Unknown subcommand: "${args[1]}". Type /help for a list of commands.`));
+              //(DESC) Assume we are running the call audio command.
+              if (args.length < 2) {
+                showMessage(new ChatMessage("", system_ChatUser, "You must enter a nickname to call someone. Type /help for a list of commands."));
+                return false;
+              } else {
+                if (args[1] === "" || args[1] === ' ') {
+                  showMessage(new ChatMessage("", system_ChatUser, "You must enter a nickname to call someone. Type /help for a list of commands."));
+                  return false;
+                }
+              }
+              message = ['c', "call", args.slice(1).join(' ').trim()]; //(NOTE) ["call", "not", "my", "dad", "lmao"].slice(1).join(' ').trim() == "not my dad lmao"
+              isCalling = true;
+              return message;
+              //return false;
           }
         }
         break;
@@ -2073,7 +2293,25 @@ if ("WebSocket" in window) {
   }
   sendBtn.onclick = sendMessageFromBox;
   wipeBtn.onclick = function() { chat.innerHTML = "";message_box.innerHTML = "" };
-  message_box.oninput = function() {
+  message_box.oninput = (ev) => {
+    let this_element = ev.target;
+    if (!ev.target && ev.srcElement) {
+      this_element = ev.srcElement;
+    }
+    if (/<br\s*[\/]?>/gi.test(this_element.innerHTML)) {
+      let br_elements_to_delete = Array.from(this_element.childNodes).filter(child_element => child_element.tagName?.toLowerCase() === "br");
+      br_elements_to_delete.forEach(element => {
+        element.parentElement?.replaceChild(document.createTextNode('\n'), element);
+      });
+    }
+    //(DESC) Get rid of the invisible newline unless it's actually important (if there's an empty newline, the text content should end with \n\n)
+    /*if (message_box.textContent.endsWith('\n') && !message_box.textContent.endsWith('\n\n')) {
+      message_box.textContent = message_box.textContent.slice(0, -1);
+    }*/
+    if (message_box.textContent === '\n') {
+      message_box.textContent = "";
+    }
+
     if (currently_typing === false) {
       currently_typing = true;
       last_seen_typing = Date.now();

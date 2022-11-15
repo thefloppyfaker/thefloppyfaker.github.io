@@ -1,7 +1,9 @@
 /* Global variables */
 :root {
-  --text-color: #444;
-  --bg-color: white;
+  --text-color: #d3d3d3;
+  --text-color-inverted: #2c2c2c;
+  --bg-color: #000;
+  --bg-color-inverted: #FFF;
 }
 
 html {
@@ -18,6 +20,7 @@ body {
   height: 100%;
   margin: 0;
   padding: 1rem;
+  overflow: hidden;
 }
 
 /* Custom scrollbar */
@@ -25,13 +28,15 @@ body {
   width: 10px;
 }
 ::-webkit-scrollbar-track { /* Track */
-  background: transparent;
+  background: none;
 }
 ::-webkit-scrollbar-thumb { /* Handle */
-  background: grey;
+  background: rgba(128, 128, 128, 0.6);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover { /* Handle on hover */
-  background: #555;
+  background: rgba(128, 128, 128, 0.5);
+  border-radius: 10px;
 }
 
 /* App container */
@@ -49,7 +54,8 @@ body {
 }
 #chat {
   display: block;
-  background-color: var(--bg-color);
+  /*background-color: var(--bg-color);*/
+  background: none;
   overflow-wrap: break-word;
 }
 .chat_message {
@@ -60,7 +66,8 @@ body {
   text-indent: -3.35rem;
 }
 .chat_message:hover {
-  background-color: #EEE;
+  /*background-color: #333;*/
+  background-color: rgba(255, 255, 255, 0.1);
 }
 .message_header {
   display: inline;
@@ -104,7 +111,7 @@ body {
 /* Spoilers */
 .spoiler_shown { /* Spoiler has been clicked */
   color: inherit;
-  background: #CCC;
+  background: #444;
 }
 .spoiler_hidden { /* Spoiler has not been clicked */
   color: transparent;
@@ -122,7 +129,7 @@ body {
 /* "User is typing" box */
 #is_typing_box {
   display: inline-block;
-  color: black;
+  color: white;
   overflow: clip;
   line-height: 2em; 
   min-height: 2em;
@@ -134,6 +141,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 3.5rem;
+  z-index: 100;
 }
 #input_area { /* Text input box */
   display: flex;
@@ -141,7 +149,7 @@ body {
   align-items: stretch;
   flex-grow: 1;
   color: var(--text-color);
-  background-color: #DDD;
+  background-color: #444;
   box-shadow: none;
   border-radius: 12px;
 }
@@ -175,7 +183,7 @@ button, input[type=button], input[type=reset], input[type=submit] {
 }
 button:not(:disabled):not(:active):hover { /* Mouse is over button */
   color: var(--text-color);
-  background-color: #EEE;
+  background-color: rgba(255, 255, 255, 0.1);
   box-shadow: none;
 }
 button:not(:disabled):not(:hover):not(:active):focus { /* Button is focused */
@@ -185,7 +193,7 @@ button:not(:disabled):not(:hover):not(:active):focus { /* Button is focused */
 }
 button:not(:disabled):active { /* Button is being clicked */
   color: var(--text-color);
-  background-color: #CCC;
+  background-color: rgba(0, 0, 0, 0.1);
   box-shadow: none;
 }
 
@@ -212,7 +220,7 @@ code, pre {
   color: #ff0000; 
 } 
 .others { 
-  color: #0000a0; 
+  color: #4a4aff; 
 }
 .normal {
   color: var(--text-color);
