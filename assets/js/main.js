@@ -915,7 +915,7 @@ message_box.addEventListener("paste", function (ev) {
     ? window.clipboardData.getData('Text')
     : '')).replace(/[\x00-\x09\x0B-\x1F\x7F]/g, "");   //(DESC) Remove all ascii control characters (\x00-\x1F) except for newline (\x0A). Also remove the DEL character (\x7F).
   
-  
+  if (pasted_text) {
   // Insert text at the current position of caret
   const range = document.getSelection().getRangeAt(0); //(DESC) Get the selected text
   const current_text = this_element.textContent;
@@ -962,6 +962,7 @@ message_box.addEventListener("paste", function (ev) {
   const selection = window.getSelection();
   selection.removeAllRanges();
   selection.addRange(range);*/
+  }
 
 
   //(DESC) Handle it if it's a file
@@ -1997,6 +1998,8 @@ if ("WebSocket" in window) {
         break;
       case "stfu":
         jinglingSound.pause();
+	jinglingSound.fadingIn = false;
+	jinglingSound.fadingOut = false;
         return false;
         break;
       case "snow":
@@ -2011,11 +2014,11 @@ if ("WebSocket" in window) {
               jinglingSound.fadingIn = false;
             }
             const fadeAudioOut = setInterval(() => {
-              if (jinglingSound.volume !== 0) {
+              if (jinglingSound.volume > .006) {
                 jinglingSound.volume -= 0.005;
               }
             
-              if (jinglingSound.volume <= .003 || !jinglingSound.fadingOut) {
+              if (jinglingSound.volume <= .006 || !jinglingSound.fadingOut) {
                 clearInterval(fadeAudioOut);
                 jinglingSound.pause();
                 jinglingSound.fadingOut = false;
