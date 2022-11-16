@@ -2538,5 +2538,7 @@ dropZone.addEventListener('dragleave', function(ev) {
 // 4
 dropZone.addEventListener('drop', dropHandler);
 
+document.getElementById("upfile").onchange = function hehe() {Array.from(this.files).forEach(function (file, i) {handleImageFileUpload(file, i)});this.value=''}
+
 
 }); //(NOTE) This is the preload_data().then() closing statement
