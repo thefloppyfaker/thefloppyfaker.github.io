@@ -10,6 +10,22 @@ async function submit_data(url, data) {
   });
   return await response.json();
 }
+
+screenLock = null;
+if('wakeLock' in navigator) {
+  if (screenLock !== null && document.visibilityState === 'visible') {
+    navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if('wakeLock' in navigator) {
+    if (screenLock !== null && document.visibilityState === 'visible') {
+      navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+    }
+  }
+});
+
 //(DESC) Preload what needs to be preloaded, then run everything else.
 async function preload_data() {
   const preloaded = {};
@@ -56,24 +72,380 @@ const callAudioElement = document.getElementById("remoteAudio");
 const userNotificationSound = document.getElementById("userNotificationSound");
 const systemNotificationSound = document.getElementById("systemNotificationSound");
 const theme = document.getElementById("theme");
-const jinglingSound = document.getElementById("jinglingSound");
-jinglingSound.fadingIn = false;
-jinglingSound.fadingOut = false;
+//const jinglingSound = document.getElementById("jinglingSound");
+//jinglingSound.fadingIn = false;
+//jinglingSound.fadingOut = false;
 
-screenLock = null;
-if('wakeLock' in navigator) {
-  if (screenLock !== null && document.visibilityState === 'visible') {
-    navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+/** A pretty cool interface for the web audio api */
+class PrettyCoolAudio {
+  #actx;
+  src;
+  #audioData;
+  #srcNode;
+  #gainNode;
+  #currentState; //(DESC) "unloaded" | "stopped" | "paused" | "playing" | "closed"
+  #options;
+
+  default_options = {
+    volume: 0,
+    loop: false,
+    fadeIn: false,
+    fadeOut: false,
+  };
+
+  /**
+   * Create a new PrettyCoolAudio interface.
+   * @param {string | ArrayBuffer} [src] - The audio source 
+   * @param {Object} [options] - Options
+   * @param {number} [options.volume] - The desired volume of the audio
+   * @param {boolean} [options.loop] - Loop this audio automatically
+   * @param {boolean} [options.fadeIn] - Fade the audio in when starting
+   * @param {boolean} [options.fadeOut] - Fade the audio out when ending
+   */
+  constructor(src = "", options) {
+    let defaults = {
+      volume: 0,
+      loop: false,
+      fadeIn: false,
+      fadeOut: false,
+    };
+    this.src = src;
+    /** @private {AudioContext} The audio context */
+    this.#actx = new (AudioContext || webkitAudioContext)();
+    /** @private {AudioBuffer} The decoded audio data for the LOADED source */
+    this.#audioData = null;
+    /** @private {AudioBufferSourceNode} The audio context */
+    this.#srcNode = null;
+    /** @private {GainNode} The audio context */
+    this.#gainNode = null;
+    /** @private {string} The current audio state. Can be "unloaded" | "stopped" | "stopping" | "paused" | "pausing" | "playing" | "closed" | "closing" */
+    this.#currentState = "unloaded";
+    /** @private {Object} Options */
+    this.#options = { ...defaults, ...options};
+  }
+
+  get currentState() {return this.#currentState}
+  get isLoaded() {return (this.currentState !== "unloaded" && this.currentState !== "closed")}
+  get isStopped() {return (this.currentState === "stopped")}
+  get isStopping() {return (this.currentState === "stopping")}
+  get isPaused() {return (this.currentState === "paused")}
+  get isPausing() {return (this.currentState === "pausing")}
+  get isPlaying() {return (this.currentState === "playing")}
+  get isClosed() {return (this.currentState === "closed")}
+  get isClosing() {return (this.currentState === "closing")}
+  get volume() {return this.#options.volume}
+  get currentTime() {return this.#actx.currentTime}
+
+  isValidNumber(number, range={min: false, max: false}) {
+    if (typeof number !== "number" || isNaN(number)) {
+      console.log("number must be a number!!!");
+      //(DEBUG)(CODE) if (typeof number !== "number") console.log(`number is typeof ${typeof number}`);
+      //(DEBUG)(CODE) else if (isNaN(number)) console.log("number is NaN");
+      return false;
+    }
+    if (range.hasOwnProperty("min") && range.hasOwnProperty("max")) { 
+      //(NOTE) This entire statement is unnecessary, remove it if you want. 
+      if (range.min !== false && range.min !== null && range.min !== undefined && range.max !== false && range.max !== null && range.max !== undefined) {
+        if (number < range.min || number > range.max) {
+          //(DEBUG)(CODE) console.log(`number must be a value between ${range.min} and ${range.max}`);
+          return false;
+        }
+      }
+    }
+    if (range.hasOwnProperty("min")) {
+      if (range.min !== false && range.min !== null && range.min !== undefined) {
+        if (number < range.min) {
+          //(DEBUG)(CODE) console.log(`number must be a value greater than ${range.min}`);
+          return false;
+        }
+      }
+    }
+    if (range.hasOwnProperty("max")) {
+      if (range.max !== false && range.max !== null && range.max !== undefined) {
+        if (number > range.max) {
+          //(DEBUG)(CODE) console.log(`number must be a value less than ${range.max}`);
+          return false;
+        }
+      }
+    }
+    //(NOTE) If none of the above occured (they all return false), then the number is valid.
+    return true;
+  }
+
+  isValidVolume(volume) {
+    return this.isValidNumber(volume, {min: 0, max: 1});
+  }
+
+  setOptions(new_options={volume: 0, loop: false, fadeIn: false, fadeOut: false}) {
+    if (Object.keys(new_options).some(key => (!this.#options.hasOwnProperty(key)))) {
+      //(DESC) new_options has a key that is not in options
+      console.log("ERROR: Cannot set options: An option has an invalid key!!");
+      return false;
+    }
+    if (Object.keys(new_options).some(key => (typeof this.#options[key] !== typeof new_options[key]))) {
+      //(DESC) new_options and this.#options both have a key value pair with the same key name, but with different value types.
+      console.log("ERROR: Cannot set options: An option has an invalid type!!");
+      return false;
+    }
+    //(NOTE) All options are valid
+
+    Object.entries(new_options).forEach(([key, new_value]) => {
+      if (key === "volume") {
+        this.setVolume(new_value);
+        return;
+      }
+      else if (key === "loop") {
+        if (this.#srcNode) {
+          this.#srcNode.loop = new_value;
+        }
+      }
+      this.#options[key] = new_value;
+    });
+    return true;
+    //return changed_options;
+  }
+
+  /** 
+   * instantly changes the volume
+   * @param {number} volume - A number between 0 and 1 to set the volume to
+   */
+  setVolume(volume, change_volume_option=true) {
+    if (!this.isValidVolume(volume)) {
+      console.log("ERROR: Cannot set volume: volume is invalid!!");
+      return false;
+    }
+    //(NOTE) Volume is valid
+    //(DESC) the web audio api *really* doesn't like a volume of zero, so set it to Number.EPSILON (the smallest non-zero value that javascript can store)
+    if (volume === 0) volume = Number.EPSILON;
+
+    if (this.#gainNode) {
+      this.#gainNode.gain.setValueAtTime(volume, this.currentTime);
+      //this.#gainNode.gain.value = volume;
+    }
+
+    if (change_volume_option) {
+      if (volume === Number.EPSILON) this.#options.volume = 0;
+      else this.#options.volume = volume;
+    }
+    return true;
+  }
+
+  /** 
+   * Fade the volume over time
+   * @param {number} length_seconds - The amount of time to fade the volume over
+   * @param {number} desired_volume - The volume to fade to (between 0 and 1)
+   */
+  fadeTo(length_seconds, desired_volume, change_volume_option=true) {
+    if (!this.isValidNumber(length_seconds, {min: 0})) {
+      console.log("ERROR: Cannot fadeTo volume: length_seconds is invalid!!!");
+      return false;
+    }
+    if (!this.isValidVolume(desired_volume)) {
+      console.log("ERROR: Cannot fadeTo volume: desired_volume is invalid!!!");
+      return false;
+    }
+    //(NOTE) length_seconds and desired_volume are vaild
+
+    if (!this.isLoaded) {
+      console.log("ERROR: Cannot fadeTo volume: No audio is loaded!!!");
+      return false;
+    }
+    if (!this.#gainNode) {
+      console.log("ERROR: Cannot fadeTo volume: No gainNode connected!!!");
+      return false;
+    }
+    //(NOTE) All prerequisites have been met
+
+    //(DESC) the web audio api *really* doesn't like a volume of zero, so set it to Number.EPSILON (the smallest non-zero value that javascript can store)
+    if (desired_volume === 0) desired_volume = Number.EPSILON;
+
+    //this.#gainNode.gain.setValueAtTime(this.volume, this.currentTime);
+    this.#gainNode.gain.linearRampToValueAtTime(desired_volume, this.currentTime + length_seconds);
+
+    if (change_volume_option) {
+      if (desired_volume === Number.EPSILON) this.#options.volume = 0;
+      else this.#options.volume = desired_volume;
+    }
+    return true;
+  }
+
+  async load_from_buffer(buffer) {
+    if (this.isClosed || this.isClosing) {console.log("Cannot load, audio is closed or closing");return false}
+    this.#audioData = await this.#actx.decodeAudioData(buffer);
+    if (this.isPaused || this.isPausing || this.isPlaying) {
+      if (this.#srcNode) {
+        this.#srcNode.stop();
+        this.#srcNode = null;
+      }
+    }
+    this.#currentState = "stopped";
+    return this.#audioData;
+  }
+
+  async load_from_url(url) {
+    if (this.isClosed || this.isClosing) {console.log("Cannot load, audio is closed or closing");return false}
+    let response = await fetch(url, {mode: "cors"});
+    let buffer = await response.arrayBuffer();
+    return await this.load_from_buffer(buffer);
+  }
+
+  async load() {
+    if (this.isClosed || this.isClosing) {console.log("Cannot load, audio is closed or closing");return false}
+    if (this.src instanceof ArrayBuffer) return await this.load_from_buffer(this.src);
+    if (typeof this.src === "string") return await this.load_from_url(this.src);
+    else console.log("ERROR: SRC MUST BE OF STRING OR INSTANCE OF ArrayBuffer!!!");
+    return false;
+  }
+
+  async play() {
+    if (this.isClosed || this.isClosing) {console.log("Cannot play, audio is closed or closing");return false}
+
+    switch (this.currentState) {
+      case "unloaded":
+        console.log("Aborting play due to no audio being loaded");
+        return false;
+      case "playing":
+        console.log("Aborting play due to currentState being set to \"playing\"");
+        return false;
+      case "pausing":
+        console.log("Audio is pausing. Playing..");
+        if (this.#options.fadeIn) this.fadeTo(5, this.#options.volume);
+        else this.setVolume(this.#options.volume);
+        this.#currentState = "playing";
+        return true;
+      case "paused":
+        console.log("Audio is paused, resuming..");
+        //this.setVolume(0, false);
+        await this.#actx.resume();
+        if (this.#options.fadeIn) this.fadeTo(5, this.#options.volume);
+        else this.setVolume(this.#options.volume);
+        this.#currentState = "playing";
+        return true;
+    }
+    
+    if (this.#actx.state === "suspended") {
+      //(DESC) AudioContext is suspended, *try* to resume it
+      try {
+        //let volume = this.#options.volume;
+        //this.setVolume(0);
+        await this.#actx.resume();
+        //if (this.#options.fadeIn) this.fadeTo(5, volume);
+        //else this.setVolume(volume);
+      }
+      catch(err) {
+        console.log("ERROR: Unable to resume audio context. Error:",err);
+        return false;
+      }
+    }
+
+    this.#gainNode = this.#actx.createGain();
+    this.#gainNode.connect(this.#actx.destination);
+    
+    this.#srcNode = this.#actx.createBufferSource();    // create audio source
+    this.#srcNode.connect(this.#gainNode);              // create output
+
+    this.#srcNode.buffer = this.#audioData;             // use decoded buffer
+    this.#srcNode.loop = this.#options.loop;            // takes care of perfect looping
+
+    this.setVolume(0, false);
+
+    
+
+    this.#srcNode.start();                              // play...
+    if (this.#options.fadeIn) this.fadeTo(5, this.#options.volume);
+    else this.setVolume(this.#options.volume);
+    this.#currentState = "playing";
+    return true;
+  }
+
+  async pause() {
+    if (this.isClosed || this.isClosing) {console.log("Cannot pause, audio is closed or closing");return false}
+    if (!this.isPlaying) {
+      console.log("Aborting pause due to currentState not being set to \"playing\"");
+      return false;
+    }
+    if (this.#options.fadeOut && !this.isPausing) { //(NOTE) if we're in the pausing state, assume that we're being forced to pause and pause immediately 
+      this.#currentState = "pausing";
+      this.fadeTo(5, 0, false);
+      setTimeout(async () => {
+        if (this.isPausing) { //(DESC) Only pause if we're still in the pausing state
+          await this.#actx.suspend();
+          this.#currentState = "paused"
+        }
+      }, 5.1*1000);
+    }
+    else {
+      this.setVolume(0, false);
+      await this.#actx.suspend();
+      this.#currentState = "paused";
+    }
+    return true;
+  }
+
+  async stop() {
+    if (this.isClosed || this.isClosing) {console.log("Cannot stop, audio is closed or closing");return false}
+    if (this.isStopped) {
+      console.log("Aborting stop due to currentState being set to \"stopped\"");
+      return true;
+    }
+    if (this.#options.fadeOut && this.volume > 0 && !this.isStopping) { //(NOTE) if we're in the stopping state, assume that we're being forced to stop and stop immediately 
+      this.fadeTo(5, 0, false);
+      this.#currentState = "stopping";
+      setTimeout(async () => {
+        if (this.isStopping) { //(DESC) Only stop if we're still in the stopping state
+          if (this.#srcNode) await this.#srcNode.stop();
+          this.#srcNode = null;
+          this.#gainNode = null;
+          this.#currentState = "stopped";
+        }
+      }, 5.1*1000);
+    }
+    else {
+      this.setVolume(0, false);
+      if (this.#srcNode) await this.#srcNode.stop();
+      this.#srcNode = null;
+      this.#gainNode = null;
+      this.#currentState = "stopped";
+    }
+    return true;
+  }
+  
+  async close() {
+    if (this.isClosed) {
+      console.log("Aborting close due to currentState being set to \"closed\"");
+      return true;
+    }
+    if (this.#options.fadeOut && this.volume > 0 && !this.isClosing) { //(NOTE) if we're in the closing state, assume that we're being forced to close and close immediately 
+      this.#currentState = "closing";
+      this.fadeTo(5, 0);
+      setTimeout(async () => {
+        if (this.isClosing) { //(DESC) Only close if we're still in the closing state
+          if (this.#srcNode) await this.#srcNode.stop();
+          if (this.#actx) await this.#actx.close();
+          this.#srcNode = null;
+          this.#gainNode = null;
+          this.#audioData = null;
+          this.#actx = null;
+          this.#currentState = "closed";
+        }
+      }, 5.1*1000);
+    }
+    else {
+      if (this.#srcNode) await this.#srcNode.stop();
+      if (this.#actx) await this.#actx.close();
+      this.#srcNode = null;
+      this.#gainNode = null;
+      this.#audioData = null;
+      this.#actx = null;
+      this.#currentState = "closed";
+    }
+    return true;
   }
 }
 
-document.addEventListener('visibilitychange', () => {
-  if('wakeLock' in navigator) {
-    if (screenLock !== null && document.visibilityState === 'visible') {
-      navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
-    }
-  }
-});
+const jinglingSound = new PrettyCoolAudio("/assets/audio/jingle_loop.mp3");
+jinglingSound.setOptions({volume: 0.1, loop: true, fadeIn: true, fadeOut: true})
+jinglingSound.load();
 
 inFullscreen = false;
 
@@ -1090,13 +1462,13 @@ document.addEventListener("keydown", function (event) {
 
 
 
-jinglingSound.addEventListener('timeupdate', function(){
+/*jinglingSound.addEventListener('timeupdate', function(){
   var buffer = .2;
   if(this.currentTime > this.duration - buffer){
     this.currentTime = 0;
     this.play();
   }
-});
+});*/
 
 //(DESC) All websocket-related code
 if ("WebSocket" in window) {
@@ -1811,6 +2183,48 @@ if ("WebSocket" in window) {
 
   connect_to_server(0);
 
+  /*function fade_audio_in(audio_element, max_volume=1, increment=.001, interval_ms=20) {
+    audio_element.fadingIn = true;
+    if (audio_element.fadingOut) {
+      audio_element.fadingOut = false;
+    }
+    let fadeAudioIn;
+    fadeAudioIn = setInterval(() => {
+      if (audio_element.volume < max_volume-.001 && audio_element.fadingIn) {
+        audio_element.volume = Math.min(audio_element.volume + increment, max_volume, 1);
+      }
+      else {
+        if (audio_element.fadingIn) {
+          //(DESC) If we didn't get stopped early
+          audio_element.volume = Math.min(max_volume, 1);
+        }
+        clearInterval(fadeAudioIn);
+        audio_element.fadingIn = false;
+      }
+    }, interval_ms);
+  }
+  function fade_audio_out(audio_element, increment=.001, interval_ms=20) {
+    audio_element.fadingOut = true;
+    if (audio_element.fadingIn) {
+      audio_element.fadingIn = false;
+    }
+    let fadeAudioOut;
+    fadeAudioOut = setInterval(() => {
+      if (audio_element.volume > increment+.001 && audio_element.fadingOut) {
+        audio_element.volume = Math.max(audio_element.volume - increment, 0);
+      }
+      else {
+        if (audio_element.fadingOut) {
+          //(DESC) If we didn't get stopped early
+          audio_element.volume = 0;
+          audio_element.pause();
+        }
+        clearInterval(fadeAudioOut);
+        audio_element.fadingOut = false;
+      }
+    }, interval_ms);
+  }*/
+
   function handleUserTyping(nickname, isTyping) {
     if (isTyping) {
       if (typing_users.indexOf(nickname) == -1) {
@@ -1997,9 +2411,10 @@ if ("WebSocket" in window) {
         return false;
         break;
       case "stfu":
-        jinglingSound.pause();
-	jinglingSound.fadingIn = false;
-	jinglingSound.fadingOut = false;
+        /*jinglingSound.pause();
+        jinglingSound.fadingIn = false;
+        jinglingSound.fadingOut = false;*/
+        jinglingSound.stop();
         return false;
         break;
       case "snow":
@@ -2009,43 +2424,19 @@ if ("WebSocket" in window) {
           sf.destroy();
           isSnowing = false;
           if (args.length === 1) {
-            jinglingSound.fadingOut = true;
-            if (jinglingSound.fadingIn) {
-              jinglingSound.fadingIn = false;
-            }
-            const fadeAudioOut = setInterval(() => {
-              if (jinglingSound.volume > .006) {
-                jinglingSound.volume -= 0.005;
-              }
-            
-              if (jinglingSound.volume <= .006 || !jinglingSound.fadingOut) {
-                clearInterval(fadeAudioOut);
-                jinglingSound.pause();
-                jinglingSound.fadingOut = false;
-              }
-            }, 20);
+            //fade_audio_out(jinglingSound, increment=.005);
+            jinglingSound.stop();
             return false;
           }
         }
         
-        
-        //jinglingSound.setAttribute("loop", "loop");
-        jinglingSound.volume = 0;
+        /*if (!jinglingSound.fadingOut && !jinglingSound.fadingIn) {
+          jinglingSound.volume = 0;
+        }
         jinglingSound.play();
-        const fadeAudioIn = setInterval(() => {
-          jinglingSound.fadingIn = true;
-          if (jinglingSound.fadingOut) {
-            jinglingSound.fadingOut = false;
-          }
-          if (jinglingSound.volume < .253) {
-            jinglingSound.volume += 0.001;
-          }
-        
-          if (jinglingSound.volume >= .253 || !jinglingSound.fadingIn) {
-            clearInterval(fadeAudioIn);
-            jinglingSound.fadingIn = false;
-          }
-        }, 20);
+
+        fade_audio_in(jinglingSound, max_volume=.25, increment=.001);*/
+        jinglingSound.play();
 
         let snowflake_parameters = {
           color: '#5ECDEF', // Default: "#5ECDEF"
@@ -2542,6 +2933,5 @@ dropZone.addEventListener('dragleave', function(ev) {
 dropZone.addEventListener('drop', dropHandler);
 
 document.getElementById("upfile").onchange = function hehe() {Array.from(this.files).forEach(function (file, i) {handleImageFileUpload(file, i)});this.value=''}
-
 
 }); //(NOTE) This is the preload_data().then() closing statement
