@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>&ZeroWidthSpace;</title>
+    <link rel="shortcut icon" href="assets/images/favicon.png" type="image/png">
+    <link href="https://unpkg.com/marx-css/css/marx.min.css" rel="stylesheet">
+    <link id="theme" rel="stylesheet" type="text/css" href="assets/css/themes/darkbluemode.css" data-theme="darkbluemode">
+    <audio id="userNotificationSound">
+      <source src="assets/audio/notif1.wav" type="audio/wav">
+      <source src="assets/audio/notif1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="systemNotificationSound">
+      <source src="assets/audio/notif2.wav" type="audio/wav">
+      <source src="assets/audio/notif2.mp3" type="audio/mpeg">
+    </audio>
+    <!--<audio id="jinglingSound">
+      <source src="assets/audio/jingle_loop.mp3" type="audio/mpeg">
+    </audio>-->
+    <!--<script src="https://kit.fontawesome.com/3e820710a1.js" crossorigin="anonymous"></script>-->
+  </head>
+
+  <body data-interacted="" onclick="document.body.setAttribute('data-interacted', ' ')" onscroll="document.body.setAttribute('data-interacted', ' ')" onkeypress="document.body.setAttribute('data-interacted', ' ')">
+    <div id="dropzone" style="box-sizing:border-box;display:none;position:fixed;width:100%;height:100%;left:0;top:0;z-index:99999;background:rgba(69,69,69,0.8);border:11px dashed grey"></div>
+    <div style="height:0;width:0;overflow:hidden"><input id="upfile" type="file" value="" multiple></div>
+    
+    <button id="wipe" title="it's the wipey wiper" style="display:inline;position:absolute;right:0;top:0;margin:0;padding:0">💀</button>
+    <div id="snowflakes_container" style="display:block; max-width: 100%; height: 100%; overflow: hidden"></div>
+    <div id="app_wrapper">
+      <div id="chat_wrapper">
+        <div id="chat"></div>
+      </div>
+      <div id="is_typing_box"></div>
+      <div id="input_area_wrapper">
+        <div id="input_area">
+          <button id="upload" onclick="document.getElementById('upfile').click()" title="it's the uppy upper" style="align-self:start;height:3.5rem;border-top-right-radius:0;border-bottom-right-radius:0;"><svg class="svg-inline--fa fa-circle-chevron-up fa-xl" style="vertical-align: middle;line-height: 1.5em;" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="circle-chevron-up" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM377 271c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-87-87-87 87c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9L239 167c9.4-9.4 24.6-9.4 33.9 0L377 271z"></path></svg></button>
+          <div id="message_box_wrapper">
+            <div id="message_box"></div>
+          </div>
+          <button id="send" title="it's the sendy sender" style="align-self:start;height:3.5rem;border-top-left-radius:0;border-bottom-left-radius:0;"><svg class="svg-inline--fa fa-circle-chevron-right fa-xl" style="vertical-align: middle;line-height: 1.5em;" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="circle-chevron-right" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M0 256C0 397.4 114.6 512 256 512s256-114.6 256-256S397.4 0 256 0S0 114.6 0 256zM241 377c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l87-87-87-87c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0L345 239c9.4 9.4 9.4 24.6 0 33.9L241 377z"></path></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <audio id="remoteAudio"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script>
+  </body>
+</html>
