@@ -4,8 +4,7 @@ async function submit_data(url, data) {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      "ngrok-skip-browser-warning": "69420"
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(data)
   });
@@ -30,17 +29,9 @@ document.addEventListener('visibilitychange', () => {
 //(DESC) Preload what needs to be preloaded, then run everything else.
 async function preload_data() {
   const preloaded = {};
-  
+
   //(DESC) Fetch config
   preloaded.config = await (await fetch("assets/data/web_config.json")).json();
-
-  await fetch("https://" + preloaded.config.ngrok_url + "/myws", {
-    method: 'GET',
-    headers: {
-      "mode": "no-cors",
-      "ngrok-skip-browser-warning": "69420"
-    }
-  });
 
   //(DESC) Fetch and define emoji table
   preloaded.emoji_definitions = await (await fetch("assets/data/emoji_definitions.json")).json();
