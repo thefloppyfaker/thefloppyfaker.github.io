@@ -30,9 +30,16 @@ document.addEventListener('visibilitychange', () => {
 //(DESC) Preload what needs to be preloaded, then run everything else.
 async function preload_data() {
   const preloaded = {};
-
+  
   //(DESC) Fetch config
   preloaded.config = await (await fetch("assets/data/web_config.json")).json();
+
+  await fetch("https://" + preloaded.config.ngrok_url + "/myws", {
+    method: 'GET',
+    headers: {
+      "ngrok-skip-browser-warning": "69420"
+    }
+  });
 
   //(DESC) Fetch and define emoji table
   preloaded.emoji_definitions = await (await fetch("assets/data/emoji_definitions.json")).json();
