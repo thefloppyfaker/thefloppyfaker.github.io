@@ -4,7 +4,8 @@ async function submit_data(url, data) {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      "ngrok-skip-browser-warning": "69420"
     },
     body: JSON.stringify(data)
   });
