@@ -37,6 +37,7 @@ async function preload_data() {
   await fetch("https://" + preloaded.config.ngrok_url + "/myws", {
     method: 'GET',
     headers: {
+      "mode": "no-cors",
       "ngrok-skip-browser-warning": "69420"
     }
   });
