@@ -653,16 +653,6 @@ class ChatMessage extends Base {
 
     return is_valid;
   }
-
-  get isEmpty() {
-    try {
-      return (this.content.replace(/[^\x21-\x7E\x80-\xFE\p{Extended_Pictographic}]+/giu, "").trim().length === 0);
-    }
-    catch(err) {
-      console.log("ERROR: Error while checking if message was empty:",err);
-      return true; //(DESC) Pretend the message is empty
-    }
-  }
 }
 
 const system_ChatUser = new ChatUser("1337", "SYSTEM");
@@ -1489,17 +1479,15 @@ if ("WebSocket" in window) {
 
   const commands = {
     "help": "Show this list",
-    "n|nick|nickname (nickname)": "Change your nickname",
-    "l|list": "Get a list of all connected users",
+    "nick (nickname)": "Change your nickname",
+    "list": "Get a list of all connected users",
     "clear": "Clear messages",
-    "h|history (number of messages)": "Load chat history from logs",
-    "f|fullscreen": "Enter fullscreen mode",
+    "history (number of messages)": "Load chat history from logs",
+    "fullscreen": "Enter fullscreen mode",
     "link": "Generate a localtunnel link",
     "theme (name|list)": "Set theme or list available themes",
-    "c|call (audio|video) (nickname)": "Initiate a call with a user",
-    "c|call (accept|reject|cancel|leave)": "Change call state",
-    "w|whisper (nickname) (message)": "Send a private message",
-    "e|elevate (nickname) (level)": "Temporarily elevate a user"
+    "call (audio|video) (nickname)": "Initiate a call with a user",
+    "call (accept|reject|cancel|leave)": "Change call state",
   }
 
   /**
@@ -2011,9 +1999,6 @@ if ("WebSocket" in window) {
             showMessage(new ChatMessage("", system_ChatUser, "ERROR: There was a serious error on the server's end."));
             //systemNotificationSound.play().catch(err => console.log(err));
             break;
-          case '1': //(DESC) Go fuck yourself
-            window.location.replace("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-            break;
           case 's': //(DESC) System Message
             let received_message = ChatMessage.from(data[1]);
             received_message.author = system_ChatUser;
@@ -2295,7 +2280,7 @@ if ("WebSocket" in window) {
         //systemNotificationSound.play().catch(err => console.log(err));
         return false;
         break;
-      case 'n': case "nick": case "nickname":
+      case "nick":
         //showMessage("sys", "SYSTEM", "This command is not yet ready.");
         //systemNotificationSound.play().catch(err => console.log(err));
         //return false;
@@ -2307,7 +2292,7 @@ if ("WebSocket" in window) {
         message = ['n', args.slice(1).join(' ')];
         return message;
         break;
-      case 'l': case "list":
+      case "list":
         message = ['l'];
         return message;
         break;
@@ -2316,11 +2301,11 @@ if ("WebSocket" in window) {
         message_box.innerHTML = "";
         return false;
         break;
-      case 'h': case "history":
+      case "history":
         message = ['h', args[1], message_ids_array[0]];
         return message;
         break;
-      case 'f': case "fullscreen":
+      case "fullscreen":
         var elem = document.documentElement;
 
         /* View in fullscreen */
@@ -2512,7 +2497,7 @@ if ("WebSocket" in window) {
         isSnowing = true;
         return false;
         break;
-      case 'c': case "call":
+      case "call":
         if (args.length < 2) {
           showMessage(new ChatMessage("", system_ChatUser, "This command must have at least one argument. Type /help for a list of commands."));
           //systemNotificationSound.play().catch(err => console.log(err));
@@ -2666,48 +2651,6 @@ if ("WebSocket" in window) {
               //return false;
           }
         }
-        break;
-      case 'w': case "whisper":
-        if (args.length < 3) {
-          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least two arguments. Type /help for a list of commands."));
-          return false;
-        } else if (args[1] === "" || args[1] === ' ') {
-          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least two arguments. Type /help for a list of commands."));
-          return false;
-        } else if (args[2] === "" || args[2] === ' ') {
-          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least two arguments. Type /help for a list of commands."));
-          return false;
-        }
-
-        message = ['w', args[1], args.slice(2).join(' ')];
-        return message;
-        break;
-      case 'e': case "elevate":
-        if (args.length < 3) {
-          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least two arguments. Type /help for a list of commands."));
-          return false;
-        } else if (args[1] === "" || args[1] === ' ') {
-          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least two arguments. Type /help for a list of commands."));
-          return false;
-        } else if (args[2] === "" || args[2] === ' ') {
-          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least two arguments. Type /help for a list of commands."));
-          return false;
-        }
-
-        message = ['e', args[1], args[2]];
-        return message;
-        break;
-      case "ban":
-        if (args.length < 2) {
-          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least one argument. Type /help for a list of commands."));
-          return false;
-        } else if (args[1] === "" || args[1] === ' ') {
-          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least one argument. Type /help for a list of commands."));
-          return false;
-        }
-
-        message = ['b', args[1]];
-        return message;
         break;
       default:
         showMessage(new ChatMessage("", system_ChatUser, `Unknown command: "${args[0]}". Type /help for a list of commands.`));
