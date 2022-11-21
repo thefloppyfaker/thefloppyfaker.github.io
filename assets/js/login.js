@@ -261,7 +261,7 @@ async function submit_data(url, data) {
   response = await fetch(url, {
     method: 'POST',
     headers: {
-      "ngrok-skip-browser-warning": "69420",
+      //"ngrok-skip-browser-warning": "69420",
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
