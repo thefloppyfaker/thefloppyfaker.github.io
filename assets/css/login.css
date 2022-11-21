@@ -35,7 +35,7 @@ body {
   background: #555;
 }
 
-@font-face {
+/*@font-face {
   font-family: Poppins-Bold;
   src: url(/assets/fonts/poppins/Poppins-Bold.ttf) format("truetype");
 }
@@ -51,7 +51,7 @@ body {
 @font-face {
   font-family: Montserrat-Regular;
   src: url(/assets/fonts/montserrat/Montserrat-Regular.ttf) format("truetype");
-}
+}*/
 
 .login_page_container {
   position: fixed;
@@ -85,7 +85,8 @@ body {
 }
 
 .login_form_header {
-  font-family: Poppins-Bold;
+  /*font-family: Poppins-Bold;*/
+  font-family: Poppins;
   font-size: 22px;
   line-height: 28px;
   color: var(--text-color);
@@ -123,7 +124,9 @@ body {
 }
 
 .login_form_forgot_password_button {
-  font-family: Montserrat-Regular;
+  /*font-family: Montserrat-Regular;*/
+  font-family: Montserrat;
+  font-weight: normal;
   color: #a3a3ac;
   padding: 10px;
   transition: color 80ms ease;
@@ -139,7 +142,9 @@ body {
 }
 
 .login_form_input_field {
-  font-family: Poppins-Medium;
+  /*font-family: Poppins-Medium;*/
+  font-family: Poppins;
+  font-weight: 500;
   display: block;
   width: 100%;
   border: none;
@@ -171,7 +176,9 @@ body {
 
 
 .login_form_input_field_label {
-  font-family: Poppins-Regular;
+  /*font-family: Poppins-Regular;*/
+  font-family: Poppins;
+  font-weight: normal;
   color: #999;
   position: absolute;
   pointer-events: none;
@@ -205,7 +212,9 @@ body {
 } 
 
 .login_form_confirm_button {
-  font-family: Poppins-Regular;
+  /*font-family: Poppins-Regular;*/
+  font-family: Poppins;
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   flex-direction: row;
@@ -215,7 +224,6 @@ body {
   align-items: center;
   justify-content: center;
   transition: color 200ms linear;
-  font-weight: bold;
   padding: 7px 0;
   border-radius: 4px;
   border-color: var(--main-color);
@@ -241,7 +249,9 @@ body {
 }
 
 .login_form_cancel_button {
-  font-family: Poppins-Regular;
+  /*font-family: Poppins-Regular;*/
+  font-family: Poppins;
+  font-weight: normal;
   margin-top: 16px;
   cursor: pointer;
   text-decoration: none;
