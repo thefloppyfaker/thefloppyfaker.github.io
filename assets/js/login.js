@@ -1,3 +1,22 @@
+function getDomain(url, subdomain) {
+  subdomain = subdomain || false;
+
+  //url = url.replace(/(https?:\/\/)?(www\.)?/i, '');
+  url = url.replace(/([a-z]*:\/\/)?(www\.)?/i, '');
+
+  if (!subdomain) {
+    url = url.split('.');
+
+    url = url.slice(url.length - 2).join('.');
+  }
+
+  if (url.indexOf('/') !== -1) {
+    return url.split('/')[0];
+  }
+
+  return url;
+}
+
 //(DESC) Preload what needs to be preloaded, then run everything else.
 async function preload_data() {
   const preloaded = {};
@@ -134,8 +153,8 @@ function generate_login_page(header_text="", input_rows_array=[{label: "", datat
   return login_page;
 }
 
-//forgor_btn.addEventListener('click', (ev) => {window.location.assign("file:///C:/Users/thefl/Documents/node_stuff/login_page_testing/forgor.html");})
-//cancel_btn.addEventListener('click', (ev) => {window.location.assign("file:///C:/Users/thefl/Documents/node_stuff/login_page_testing/signup.html");})
+//forgor_btn.addEventListener('click', (ev) => {location.assign("file:///C:/Users/thefl/Documents/node_stuff/login_page_testing/forgor.html");})
+//cancel_btn.addEventListener('click', (ev) => {location.assign("file:///C:/Users/thefl/Documents/node_stuff/login_page_testing/signup.html");})
 
 //(DESC) Check if input data is valid, returns true if valid and false if invalid.
 const is_valid_input_data = (value, datatype) => {
@@ -261,7 +280,6 @@ async function submit_data(url, data) {
   response = await fetch(url, {
     method: 'POST',
     headers: {
-      //"ngrok-skip-browser-warning": "69420",
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
@@ -313,10 +331,16 @@ function authentication_server_response_error_handler(server_response) {
 //(ARGS) login_step: "login" | "signup" | "forgor",
 //       data: {data-type: value, data-type: value, etc.}
 async function authenticate(login_step, data) {
-  let auth_url = `${location.protocol}//${preloaded.config.ngrok_url}/auth`;
-  if (window.location.hostname === "localhost") {
-    auth_url = `${location.protocol}//${window.location.host}/auth`;
+  let domain = getDomain(location.host) ;
+  let auth_url_properties = {
+    protocol: location.protocol,
+    host: domain,
+    path: "/auth",
   }
+  if (preloaded.config.supported_external_domains.includes(domain)) {
+    auth_url_properties.host = preloaded.config.ngrok_url;
+  }
+  let auth_url = `${auth_url_properties.protocol}//${auth_url_properties.host}${auth_url_properties.path}`;
   let server_response;
 
   if (login_step === "login") {
@@ -328,7 +352,7 @@ async function authenticate(login_step, data) {
     }
 
     localStorage.setItem("token", server_response.token);
-    window.location.replace(`${location.protocol}//${window.location.host}`);
+    location.replace(`${location.protocol}//${location.host}`);
     
     //console.log("data=",JSON.stringify(data)); 
     //console.log("server_response=",server_response);
@@ -343,7 +367,7 @@ async function authenticate(login_step, data) {
     }
 
     localStorage.setItem("token", server_response.token);
-    window.location.replace(`${location.protocol}//${window.location.host}`);
+    location.replace(`${location.protocol}//${location.host}`);
 
     //console.log("data=",JSON.stringify(data)); 
     //console.log("server_response=",server_response);

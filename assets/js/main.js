@@ -12,6 +12,8 @@ async function submit_data(url, data) {
 }
 
 screenLock = null;
+navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
+
 if('wakeLock' in navigator) {
   if (screenLock !== null && document.visibilityState === 'visible') {
     navigator.wakeLock.request('screen').then(lock => screenLock = lock).catch(err => console.log(err.name, err.message));
@@ -26,6 +28,25 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+function getDomain(url, subdomain) {
+  subdomain = subdomain || false;
+
+  //url = url.replace(/(https?:\/\/)?(www\.)?/i, '');
+  url = url.replace(/([a-z]*:\/\/)?(www\.)?/i, '');
+
+  if (!subdomain) {
+    url = url.split('.');
+
+    url = url.slice(url.length - 2).join('.');
+  }
+
+  if (url.indexOf('/') !== -1) {
+    return url.split('/')[0];
+  }
+
+  return url;
+}
+
 //(DESC) Preload what needs to be preloaded, then run everything else.
 async function preload_data() {
   const preloaded = {};
@@ -38,28 +59,35 @@ async function preload_data() {
 
   //(DESC) Check if there is a token in localstorage
   if (localStorage.getItem("token")) {
-    let auth_url = `${location.protocol}//${preloaded.config.ngrok_url}/auth`;
-    if (window.location.hostname === "localhost") {
-      auth_url = `${location.protocol}//${window.location.host}/auth`;
+    let domain = getDomain(location.host);
+    let auth_url_properties = {
+      protocol: location.protocol,
+      host: domain,
+      path: "/auth",
     }
+    if (preloaded.config.supported_external_domains.includes(domain)) {
+      auth_url_properties.host = preloaded.config.ngrok_url;
+    }
+    let auth_url = `${auth_url_properties.protocol}//${auth_url_properties.host}${auth_url_properties.path}`;
+
     let server_response = await submit_data(`${auth_url}/token`, {token: localStorage.getItem("token")});
     if (server_response.hasOwnProperty("error")) {
       //(DESC) Server sent us an error (token is probably invalid). Go back to the login page.
-      window.location.replace(`${location.protocol}//${window.location.host}/login`);
+      location.replace(`${location.protocol}//${location.host}/login`);
       return; //(NOTE) Should never be run
     }
 
     preloaded.our_ChatUser = server_response.user;
   } else {
     //(DESC) There isn't a login token in localStorage. Go back to the login page.
-    window.location.replace(`${location.protocol}//${window.location.host}/login`);
+    location.replace(`${location.protocol}//${location.host}/login`);
     return; //(NOTE) Should never be run
   }
   return preloaded;
 };
 
 preload_data().then((preloaded) => {
-if (!preloaded) return; //(NOTE) This is just here to stop the function if it's running ahead of the above window.location.replace
+if (!preloaded) return; //(NOTE) This is just here to stop the function if it's running ahead of the above location.replace
 
 //(DESC) Element defines from the webpage
 const chat = document.getElementById("chat");
@@ -75,6 +103,8 @@ const theme = document.getElementById("theme");
 //const jinglingSound = document.getElementById("jinglingSound");
 //jinglingSound.fadingIn = false;
 //jinglingSound.fadingOut = false;
+
+
 
 /** A pretty cool interface for the web audio api */
 class PrettyCoolAudio {
@@ -1284,7 +1314,7 @@ chat_wrapper.addEventListener("scroll", (ev) => {
 message_box.addEventListener("paste", function (ev) {
   let this_element = ev.target;
   if (!ev.target && ev.srcElement) {
-    this_element = ev.srcElement;
+    this_element = ev.srcElement; // For IE (as if I'm ever going to support it)
   }
   // Prevent the default action (if text, it would paste rich text into box)
   ev.preventDefault();
@@ -1292,7 +1322,7 @@ message_box.addEventListener("paste", function (ev) {
   // Get the copied text from the clipboard
   const pasted_text = ((ev.clipboardData
     ? (ev.originalEvent || ev).clipboardData.getData('text/plain')
-    : // For IE
+    : // For IE (as if I'm ever going to support it)
     window.clipboardData
     ? window.clipboardData.getData('Text')
     : '')).replace(/[\x00-\x09\x0B-\x1F\x7F]/g, "");   //(DESC) Remove all ascii control characters (\x00-\x1F) except for newline (\x0A). Also remove the DEL character (\x7F).
@@ -1498,8 +1528,10 @@ if ("WebSocket" in window) {
     "theme (name|list)": "Set theme or list available themes",
     "c|call (audio|video) (nickname)": "Initiate a call with a user",
     "c|call (accept|reject|cancel|leave)": "Change call state",
-    "w|whisper (nickname) (message)": "Send a private message",
-    "e|elevate (nickname) (level)": "Temporarily elevate a user"
+    "w|whisper (nickname|id) (message)": "Send a private message",
+    "e|elevate (nickname|id) (level)": "Temporarily elevate a user",
+    "b|ban|bam (nickname|id)": "b a m (bans a user's ip and id)",
+    "roll (nickname|id)": "( ͡° ᴥ ͡°)"
   }
 
   /**
@@ -1951,21 +1983,26 @@ if ("WebSocket" in window) {
 
   function connect_to_server(timeout_length_ms) {
     //(NOTE) This links to the websocket proxy
-    if (location.protocol === "https:") {
-      //ws = new WebSocket("wss://" + window.location.host + "/myws");
-      ws = new WebSocket("wss://" + preloaded.config.ngrok_url + "/myws");
-      ws.onclose = (err) => {console.log("ERROR: Error while connecting to server:",err);
-      console.log("Attempting reconnect");
-      isReconnecting = true;
-      setTimeout(connect_to_server(timeout_length_ms*2), timeout_length_ms);};
-    } else {
-      ws = new WebSocket("ws://" + window.location.host + "/myws");
-      ws.onclose = (err) => {console.log("ERROR: Error while connecting to server:",err);
-      console.log("Attempting reconnect");
-      isReconnecting = true;
-      setTimeout(connect_to_server(timeout_length_ms*2), timeout_length_ms);};
+    let domain = getDomain(location.host);
+    let websocket_url_properties = {
+      protocol: "ws:",
+      host: domain,
+      path: "/myws",
     }
-    
+    if (location.protocol === "https:") {
+      websocket_url_properties.protocol = "wss:";
+      if (preloaded.config.supported_external_domains.includes(domain)) {
+        websocket_url_properties.host = preloaded.config.ngrok_url;
+      }      
+    }
+    let websocket_url = `${websocket_url_properties.protocol}//${websocket_url_properties.host}${websocket_url_properties.path}`;
+
+    ws = new WebSocket(websocket_url);
+    ws.onclose = (err) => {console.log("ERROR: Error while connecting to server:",err);
+    console.log("Attempting reconnect");
+    isReconnecting = true;
+    //setTimeout(connect_to_server(timeout_length_ms*2), timeout_length_ms);};
+    setTimeout(connect_to_server(Math.max(timeout_length_ms+1000), 5000), timeout_length_ms);};    
 
 
     ws.onopen = function() {
@@ -2012,7 +2049,7 @@ if ("WebSocket" in window) {
             //systemNotificationSound.play().catch(err => console.log(err));
             break;
           case '1': //(DESC) Go fuck yourself
-            window.location.replace("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+            location.replace("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
             break;
           case 's': //(DESC) System Message
             let received_message = ChatMessage.from(data[1]);
@@ -2379,8 +2416,8 @@ if ("WebSocket" in window) {
 
         let chosen_theme_filename = "";
         Object.entries(theme_aliases).every(([theme_filename, aliases]) => {
-          console.log("aliases:",aliases);
-          console.log("formatted_theme_arg:",formatted_theme_arg);
+          //console.log("aliases:",aliases);
+          //console.log("formatted_theme_arg:",formatted_theme_arg);
           if (aliases.includes(formatted_theme_arg)) {
             chosen_theme_filename = theme_filename;
             return false;
@@ -2697,7 +2734,7 @@ if ("WebSocket" in window) {
         message = ['e', args[1], args[2]];
         return message;
         break;
-      case "ban":
+      case 'b': case "ban": case "bam":
         if (args.length < 2) {
           showMessage(new ChatMessage("", system_ChatUser, "This command must have at least one argument. Type /help for a list of commands."));
           return false;
@@ -2709,6 +2746,17 @@ if ("WebSocket" in window) {
         message = ['b', args[1]];
         return message;
         break;
+      case "roll":
+        if (args.length < 2) {
+          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least one argument. Type /help for a list of commands."));
+          return false;
+        } else if (args[1] === "" || args[1] === ' ') {
+          showMessage(new ChatMessage("", system_ChatUser, "This command must have at least one argument. Type /help for a list of commands."));
+          return false;
+        }
+        message = ['q', args[1]];
+        return message;
+        break
       default:
         showMessage(new ChatMessage("", system_ChatUser, `Unknown command: "${args[0]}". Type /help for a list of commands.`));
         //systemNotificationSound.play().catch(err => console.log(err));
