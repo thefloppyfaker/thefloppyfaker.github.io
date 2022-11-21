@@ -445,7 +445,7 @@ class PrettyCoolAudio {
 
 const jinglingSound = new PrettyCoolAudio("/assets/audio/jingle_loop.mp3");
 jinglingSound.setOptions({volume: 0.1, loop: true, fadeIn: true, fadeOut: true})
-jinglingSound.load();
+setTimeout(function hhh() {jinglingSound.load()}, 2000);
 
 inFullscreen = false;
 
