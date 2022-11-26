@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>&ZeroWidthSpace;</title>
+    <link rel="shortcut icon" href="assets/images/favicon.png" type="image/png">
+    <link href="https://unpkg.com/marx-css/css/marx.min.css" rel="stylesheet">
+    <link id="theme" rel="stylesheet" type="text/css" href="assets/css/themes/darkbluemode.css" data-theme="darkbluemode">
+    <audio id="userNotificationSound">
+      <source src="assets/audio/notif1.wav" type="audio/wav">
+      <source src="assets/audio/notif1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="systemNotificationSound">
+      <source src="assets/audio/notif2.wav" type="audio/wav">
+      <source src="assets/audio/notif2.mp3" type="audio/mpeg">
+    </audio>
+    <!--<audio id="jinglingSound">
+      <source src="assets/audio/jingle_loop.mp3" type="audio/mpeg">
+    </audio>-->
+    <!--<script src="https://kit.fontawesome.com/3e820710a1.js" crossorigin="anonymous"></script>-->
+  </head>
+
+  <body data-interacted="" onclick="document.body.setAttribute('data-interacted', ' ')" onscroll="document.body.setAttribute('data-interacted', ' ')" onkeypress="document.body.setAttribute('data-interacted', ' ')">
+    <div id="dropzone" style="box-sizing:border-box;display:none;position:fixed;width:100%;height:100%;left:0;top:0;z-index:99999;background:rgba(69,69,69,0.8);border:11px dashed grey"></div>
+    <div style="height:0;width:0;overflow:hidden"><input id="upfile" type="file" value="" multiple></div>
+    
+    <button id="wipe" title="it's the wipey wiper" style="display:inline;position:absolute;right:0;top:0;margin:0;padding:0">💀</button>
+    <div id="snowflakes_container" style="display:block; max-width: 100%; height: 100%; overflow: hidden"></div>
+    
+    <div id="app_wrapper">
+      <div id="chat_wrapper">
+        <div id="chat">
+
+          <div class="chat_message" id="7000618816719949243"><div class="message_header"><time class="message_timestamp" datetime="2022-11-22T00:39:51.114Z" title="Mon Nov 21 2022 7:39:51 PM"> 7:39 PM</time><span class="username you">Ryan<i>&nbsp;</i></span></div><span class="message_content">omggg</span></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
+
+          <div class="chat_message" id="7000604966754846507">
+
+
+
+
+            <!--<style>
+              :root {
+                --shift-pressed-visibility-flex: flex;
+                --shift-not-pressed-visibility-flex: none;
+                /*--shift-pressed-visibility-flex: none;
+                --shift-not-pressed-visibility-flex: flex;*/
+              }
+
+              .QuickActionBar {
+                display: flex;
+                opacity: 1;
+                position: absolute;
+                z-index: 5;
+                top: -20px;
+                right: 32px;
+                width: auto;
+                background: #4f515d;
+                border-radius: 2px;
+                border: 1px solid rgba(163,163,172,.2);
+                -webkit-user-select: none;
+                user-select: none;
+                box-shadow: 0 2px 5px 0 rgba(0,0,0,.25);
+                box-sizing: border-box;
+                cursor: pointer;
+              }
+
+              .QuickActionBar-action-wrapper {
+                cursor: pointer;
+                position: relative;
+                box-sizing: border-box;
+              } 
+
+              .QuickActionBar-action-wrapper:not(.shift-pressed) {
+                display: var(--shift-not-pressed-visibility-flex);
+              }
+
+              .shift-pressed {
+                display: var(--shift-pressed-visibility-flex);
+              }
+
+              .QuickActionBar-action {
+                cursor: pointer;
+                height: 26px;
+                width: 26px;
+                padding: 5px;
+                fill: #a3a3ac;
+                display: flex;
+                align-items: center;
+                flex-shrink: 1;
+                padding: 5px 8px;
+                width: 32px;
+                margin: 0;
+                right: 0;
+                position: relative;
+              }
+
+              .QuickActionBar-action:hover {
+                background-color: rgba(255,255,255,.1);
+                fill: #fff;
+              }
+
+              .separator-left:before{
+                content:"";
+                top:3px;
+                bottom:3px;
+                position:absolute;
+                width:1px;
+                background:rgba(163,163,172,.2);
+                left:0
+              }
+              .separator-right:before{
+                content:"";
+                top:3px;
+                bottom:3px;
+                position:absolute;
+                width:1px;
+                background:rgba(163,163,172,.2);
+                right:0
+              }
+              .destructive {
+                fill: #df5353;
+                color: #df5353;
+              }
+
+              .SVGIcon-icon {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+              }
+
+            </style>-->
+            <script>
+              window.addEventListener("keydown", (ev) => {
+                if (ev.key === "Shift" && !ev.repeat) {
+                  document.documentElement.style.setProperty('--shift-not-pressed-visibility-flex', 'none');
+                  document.documentElement.style.setProperty('--shift-pressed-visibility-flex', 'flex');
+                }
+              });
+
+              window.addEventListener("keyup", (ev) => {
+                if (ev.key === "Shift") {
+                  document.documentElement.style.setProperty('--shift-not-pressed-visibility-flex', 'flex');
+                  document.documentElement.style.setProperty('--shift-pressed-visibility-flex', 'none');
+                }
+              });
+            </script>
+
+            <div class="QuickActionBar">
+
+              <div class="QuickActionBar-action-wrapper" data-name="reply">
+                <div class="QuickActionBar-action">
+                  <svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 512 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M205 34.8c11.5 5.1 19 16.6 19 29.2v64H336c97.2 0 176 78.8 176 176c0 113.3-81.5 163.9-100.2 174.1c-2.5 1.4-5.3 1.9-8.1 1.9c-10.9 0-19.7-8.9-19.7-19.7c0-7.5 4.3-14.4 9.8-19.5c9.4-8.8 22.2-26.4 22.2-56.7c0-53-43-96-96-96H224v64c0 12.6-7.4 24.1-19 29.2s-25 3-34.4-5.4l-160-144C3.9 225.7 0 217.1 0 208s3.9-17.7 10.6-23.8l160-144c9.4-8.5 22.9-10.6 34.4-5.4z"/></svg>
+                </div>
+              </div>              
+
+              <div class="QuickActionBar-action-wrapper shift-pressed" data-name="edit">
+                <div class="QuickActionBar-action">
+                  <svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"/></svg>
+                </div>
+              </div>
+
+              <div class="QuickActionBar-action-wrapper shift-pressed" data-name="share">
+                <div class="QuickActionBar-action">
+                  <svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M246.6 9.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 109.3V320c0 17.7 14.3 32 32 32s32-14.3 32-32V109.3l73.4 73.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-128-128zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32v64c0 53 43 96 96 96H352c53 0 96-43 96-96V352c0-17.7-14.3-32-32-32s-32 14.3-32 32v64c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V352z"/></svg>
+                </div>
+              </div>
+
+              <div class="QuickActionBar-action-wrapper shift-pressed" data-name="copy-content">
+                <div class="QuickActionBar-action">
+                  <svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z"/></svg>
+                </div>
+              </div>
+
+              <div class="QuickActionBar-action-wrapper shift-pressed" data-name="pin">
+                <div class="QuickActionBar-action">
+                  <svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M32 32C32 14.3 46.3 0 64 0H320c17.7 0 32 14.3 32 32s-14.3 32-32 32H290.5l11.4 148.2c36.7 19.9 65.7 53.2 79.5 94.7l1 3c3.3 9.8 1.6 20.5-4.4 28.8s-15.7 13.3-26 13.3H32c-10.3 0-19.9-4.9-26-13.3s-7.7-19.1-4.4-28.8l1-3c13.8-41.5 42.8-74.8 79.5-94.7L93.5 64H64C46.3 64 32 49.7 32 32zM160 384h64v96c0 17.7-14.3 32-32 32s-32-14.3-32-32V384z"/></svg>
+                </div>
+              </div>
+              
+              <div class="QuickActionBar-action-wrapper shift-pressed" data-name="quote">
+                <div class="QuickActionBar-action">
+                  <svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M0 216C0 149.7 53.7 96 120 96h8c17.7 0 32 14.3 32 32s-14.3 32-32 32h-8c-30.9 0-56 25.1-56 56v8h64c35.3 0 64 28.7 64 64v64c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V320 288 216zm256 0c0-66.3 53.7-120 120-120h8c17.7 0 32 14.3 32 32s-14.3 32-32 32h-8c-30.9 0-56 25.1-56 56v8h64c35.3 0 64 28.7 64 64v64c0 35.3-28.7 64-64 64H320c-35.3 0-64-28.7-64-64V320 288 216z"/></svg>
+                </div>
+              </div>
+
+              <div class="QuickActionBar-action-wrapper shift-pressed" data-name="copy-id">
+                <div class="QuickActionBar-action">
+                  <svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64zm96 320h64c44.2 0 80 35.8 80 80c0 8.8-7.2 16-16 16H96c-8.8 0-16-7.2-16-16c0-44.2 35.8-80 80-80zm96-96c0 35.3-28.7 64-64 64s-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64zM144 64h96c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg>
+                </div>
+              </div>
+                
+              <div class="QuickActionBar-action-wrapper shift-pressed destructive" data-name="delete">
+                <div class="QuickActionBar-action">
+                  <svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"/></svg>
+                </div>
+              </div>
+
+              <div class="QuickActionBar-action-wrapper separator-left" data-name="context-menu">
+                <div class="QuickActionBar-action">
+                  <svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M64 360c30.9 0 56 25.1 56 56s-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56zm0-160c30.9 0 56 25.1 56 56s-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56zM120 96c0 30.9-25.1 56-56 56S8 126.9 8 96S33.1 40 64 40s56 25.1 56 56z"/></svg>
+                </div>
+              </div>
+
+            </div>
+            
+
+
+
+
+            <div class="message_header">
+              <time class="message_timestamp" datetime="2022-11-21T23:44:49.025Z" title="Mon Nov 21 2022 6:44:49 PM"> 6:44 PM</time><span class="username you">Ryan<i>&nbsp;</i></span>
+            </div>
+            <span class="message_content">hallo svens family woo HOOO</span>
+          </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <style>
+            .EditHelper-container {
+              /*margin: 6px 0;*/
+              margin: 6px;
+              text-align: right;
+              font-size: 13px;
+              color: #a3a3ac;
+            }
+            .EditHelper-action {
+              cursor: pointer;
+              color: var(--link-color);
+              text-decoration: none;
+              transition: 150ms ease-in-out;
+            }
+            .EditHelper-action:hover {
+              color: lightblue;
+            }
+            .EditArea {
+              margin: 3px 6px 0 0;
+            }
+          </style>
+
+          <div class="chat_message" id="7000604989980908877">
+            <div class="message_header">
+              <time class="message_timestamp" datetime="2022-11-21T23:46:45.064Z" title="Mon Nov 21 2022 6:46:45 PM"> 6:46 PM</time><span class="username others">Not Ryan<i>&nbsp;</i></span>
+            </div>
+            <!--<span class="message_content">Oh HALLO self!!!</span>-->
+            <div class="EditArea">
+              <div id="input_area_wrapper">
+                <div id="input_area">
+                  <div id="message_box_wrapper">
+                    <div id="message_box"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="EditHelper-container">
+                escape to <a class="EditHelper-action">cancel</a> • enter to <a class="EditHelper-action">save</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div id="is_typing_box"></div>
+      <div id="input_area_wrapper">
+        <div id="input_area">
+          <button id="upload" onclick="document.getElementById('upfile').click()" title="it's the uppy upper" style="align-self:start;height:3.5rem;border-top-right-radius:0;border-bottom-right-radius:0;"><svg class="svg-inline--fa fa-circle-chevron-up fa-xl" style="vertical-align: middle;line-height: 1.5em;" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="circle-chevron-up" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM377 271c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-87-87-87 87c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9L239 167c9.4-9.4 24.6-9.4 33.9 0L377 271z"></path></svg></button>
+          <div id="message_box_wrapper">
+            <div id="message_box"></div>
+          </div>
+          <button id="send" title="it's the sendy sender" style="align-self:start;height:3.5rem;border-top-left-radius:0;border-bottom-left-radius:0;"><svg class="svg-inline--fa fa-circle-chevron-right fa-xl" style="vertical-align: middle;line-height: 1.5em;" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="circle-chevron-right" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M0 256C0 397.4 114.6 512 256 512s256-114.6 256-256S397.4 0 256 0S0 114.6 0 256zM241 377c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l87-87-87-87c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0L345 239c9.4 9.4 9.4 24.6 0 33.9L241 377z"></path></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <audio id="remoteAudio"></audio>
+
+    <!--<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script>-->
+  </body>
+</html>

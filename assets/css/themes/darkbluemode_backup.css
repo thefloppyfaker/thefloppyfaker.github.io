@@ -1,26 +1,25 @@
 /* Global variables */
 :root {
-  --text-color: #d3d3d3;
-  --text-color-inverted: #2c2c2c;
-  --bg-color: #000;
-  --bg-color-inverted: #FFF;
-  --mid-color: #444;
-
-  
-  --shift-pressed-visibility-flex: none;
-  --shift-not-pressed-visibility-flex: flex;
+  --text-color: rgb(249, 255, 235);
+  --disabled-color: rgb(151, 175, 216);
+  /*--mid-color: rgb(100, 112, 160);*/
+  --mid-color:rgb(50, 69, 134);
+  /*--bg-color: rgb(50, 69, 134);*/
+  --dark-color: #141c36;
+  --bg-color: var(--dark-color);
+  --main-color: rgb(225, 122, 81);
 }
 
 html {
   /* To make use of full height of page*/
-  background-color: var(--bg-color);
+  background: var(--bg-color);
   min-height: 100%;
   height: 100%;
   margin: 0;
 }
 body {
   display: flex;
-  background-color: var(--bg-color);
+  background: var(--bg-color);
   min-height: 100%;
   height: 100%;
   margin: 0;
@@ -33,10 +32,10 @@ body {
   width: 10px;
 }
 ::-webkit-scrollbar-track { /* Track */
-  background: none;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb { /* Handle */
-  background: rgba(128, 128, 128, 0.6);
+  background: var(--disabled-color);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover { /* Handle on hover */
@@ -59,13 +58,11 @@ body {
 }
 #chat {
   display: block;
-  /*background-color: var(--bg-color);*/
-  background: none;
+  background-color: var(--bg-color);
   overflow-wrap: break-word;
 }
 .chat_message {
   display: block;
-  position: relative;
   color: var(--text-color);
   margin-left: -5.9rem;
   padding-left: 9rem;
@@ -73,7 +70,7 @@ body {
 }
 .chat_message:hover {
   /*background-color: #333;*/
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 .message_header {
   display: inline;
@@ -117,11 +114,12 @@ body {
 /* Spoilers */
 .spoiler_shown { /* Spoiler has been clicked */
   color: inherit;
-  background: var(--mid-color);
+  /*background: var(--disabled-color);*/
+  background: rgba(0, 0, 0, 0.2);
 }
 .spoiler_hidden { /* Spoiler has not been clicked */
   color: transparent;
-  background: #333333;
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 0.2em;
   cursor: pointer;
   user-select: none;
@@ -154,6 +152,7 @@ body {
   flex-direction: row;
   align-items: stretch;
   flex-grow: 1;
+  /*color: var(--text-color);*/
   color: var(--text-color);
   background-color: var(--mid-color);
   box-shadow: none;
@@ -203,7 +202,7 @@ button:not(:disabled):active { /* Button is being clicked */
   box-shadow: none;
 }
 
-/* Separator tags */
+/* Seperator tags */
 i {
   position: absolute;
   opacity: 0;
@@ -230,97 +229,4 @@ code, pre {
 }
 .normal {
   color: var(--text-color);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-.QuickActionBar {
-  display: flex;
-  opacity: 1;
-  position: absolute;
-  z-index: 5;
-  top: -20px;
-  right: 32px;
-  width: auto;
-  background: #191919;
-  border-radius: 2px;
-  border: 1px solid rgba(163,163,172,.2);
-  -webkit-user-select: none;
-  user-select: none;
-  box-shadow: 0 2px 5px 0 rgba(0,0,0,.25);
-  box-sizing: border-box;
-  cursor: pointer;
-}
-
-.QuickActionBar-action-wrapper {
-  cursor: pointer;
-  position: relative;
-  box-sizing: border-box;
-} 
-
-.QuickActionBar-action-wrapper:not(.shift-pressed) {
-  display: var(--shift-not-pressed-visibility-flex);
-}
-
-.shift-pressed {
-  display: var(--shift-pressed-visibility-flex);
-}
-
-.QuickActionBar-action {
-  cursor: pointer;
-  height: 26px;
-  width: 26px;
-  padding: 5px;
-  fill: #a3a3ac;
-  display: flex;
-  align-items: center;
-  flex-shrink: 1;
-  padding: 5px 8px;
-  width: 32px;
-  margin: 0;
-  right: 0;
-  position: relative;
-}
-
-.QuickActionBar-action:hover {
-  background-color: rgba(255,255,255,.1);
-  fill: #fff;
-}
-
-.separator-left:before{
-  content:"";
-  top:3px;
-  bottom:3px;
-  position:absolute;
-  width:1px;
-  background:rgba(163,163,172,.2);
-  left:0
-}
-.separator-right:before{
-  content:"";
-  top:3px;
-  bottom:3px;
-  position:absolute;
-  width:1px;
-  background:rgba(163,163,172,.2);
-  right:0
-}
-.destructive {
-  fill: #df5353;
-  color: #df5353;
-}
-
-.SVGIcon-icon {
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
 }
