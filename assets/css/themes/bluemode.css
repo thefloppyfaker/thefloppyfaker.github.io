@@ -65,7 +65,7 @@ body {
   display: block;
   position: relative;
   color: var(--text-color);
-  margin-left: -5.9rem;
+  margin-left: -5.6rem;
   padding-left: 9rem;
   text-indent: -3.35rem;
 }
@@ -77,6 +77,9 @@ body {
   display: inline;
   vertical-align: top;
   cursor: text;
+}
+.message_header:not(:first-child) { /* (DESC) If the message header is NOT the first child of the chat_message container, it will be pushed to the LEFT to offset the rightwards push that all non-first children get. */
+  margin-left: -3.35rem;
 }
 .message_timestamp {
   display: inline-block;
@@ -103,6 +106,11 @@ body {
   overflow: hidden;
   word-wrap: break-word;
   -ms-flex-negative: 0;
+
+
+  /*NEW, NOT WELL TESTED!!!*/
+  flex-shrink: 0;
+  text-indent: 0;
 }
 .message_content {
   display: inline;
@@ -115,8 +123,8 @@ body {
 /* Spoilers */
 .spoiler_shown { /* Spoiler has been clicked */
   color: inherit;
-  /*background: var(--disabled-color);*/
-  background: rgba(0, 0, 0, 0.2);
+  /*background: rgba(0, 0, 0, 0.2);*/
+  background: var(--mid-color);
 }
 .spoiler_hidden { /* Spoiler has not been clicked */
   color: transparent;
@@ -142,13 +150,13 @@ body {
   user-select: none;
 }
 
-#input_area_wrapper {
+.input_area_wrapper {
   display: flex;
   flex-direction: column;
   min-height: 3.5rem;
   z-index: 100;
 }
-#input_area { /* Text input box */
+.input_area { /* Text input box */
   display: flex;
   flex-direction: row;
   align-items: stretch;
@@ -159,20 +167,21 @@ body {
   box-shadow: none;
   border-radius: 12px;
 }
-#message_box_wrapper {
+.message_box_wrapper {
   display: block;
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: scroll;
   max-height: 50vh;
 }
-#message_box {
+.message_box {
   display: block;
   padding: 1rem;
   font-size: 1rem;
   min-height: 1.375rem;
   line-height: 1.375rem;
   cursor: text;
+  text-indent: 0;
   position: relative; outline: none; white-space: pre-wrap; overflow-wrap: break-word; word-break: break-word; white-space: break-spaces!important; user-select: text;
 }
 
@@ -238,6 +247,9 @@ code, pre {
 
 
 
+
+
+/* Message hover buttons container */
 .QuickActionBar {
   display: flex;
   opacity: 1;
@@ -256,20 +268,22 @@ code, pre {
   cursor: pointer;
 }
 
+/* Message hover button wrapper */
 .QuickActionBar-action-wrapper {
   cursor: pointer;
   position: relative;
   box-sizing: border-box;
 } 
-
 .QuickActionBar-action-wrapper:not(.shift-pressed) {
   display: var(--shift-not-pressed-visibility-flex);
 }
 
+/* Things that should display when shift is pressed */
 .shift-pressed {
   display: var(--shift-pressed-visibility-flex);
 }
 
+/* Message hover button(s) */
 .QuickActionBar-action {
   cursor: pointer;
   height: 26px;
@@ -285,13 +299,11 @@ code, pre {
   right: 0;
   position: relative;
 }
-
 .QuickActionBar-action:hover {
   background-color: rgba(255,255,255,.1);
   fill: #fff;
 }
-
-.separator-left:before{
+.separator-left::before{
   content:"";
   top:3px;
   bottom:3px;
@@ -300,7 +312,7 @@ code, pre {
   background:rgba(163,163,172,.2);
   left:0
 }
-.separator-right:before{
+.separator-right::before{
   content:"";
   top:3px;
   bottom:3px;
@@ -318,4 +330,192 @@ code, pre {
   overflow: hidden;
   width: 100%;
   height: 100%;
+}
+
+
+
+/* Message editing box */
+.EditArea {
+  margin: 3px 6px 0 0;
+}
+/* Message editing "enter to save, escape to cancel" container */
+.EditHelper-container {
+  /*margin: 6px 0;*/
+  margin: 6px;
+  text-align: right;
+  font-size: 13px;
+  color: #a3a3ac;
+}
+/* Message editing save and edit "buttons" */
+.EditHelper-action {
+  cursor: pointer;
+  color: var(--link-color);
+  text-decoration: none;
+  transition: 150ms ease-in-out;
+}
+.EditHelper-action:hover {
+  color: lightblue;
+}
+
+/* Edited message indicator (edited) */
+.edit_indicator {
+  display: inline-block;
+  position: relative;
+  margin-left: 4px;
+  font-size: 12px;
+  opacity:0.75;
+  /*pointer-events: none;*/
+  user-select: none;
+  cursor: help;
+}
+
+
+
+/* Message reply */
+.message_reply {
+  /*--timestamp-width: 4rem;
+  --text-indent: -4rem;
+  margin-left: calc(var(--timestamp-width) + .25rem + var(--text-indent));*/
+  margin-left: 0.25rem;
+
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  position: relative;
+  user-select: none;
+}
+
+/* Message reply spine pointer thingy */
+.message_reply::before {
+  --spine-width: 2px;
+  --timestamp-width: 3.1rem;
+  --gutter: 0.25rem;
+  --reply-spacing: 4px;
+
+  display: block;
+  position: absolute;
+  box-sizing: border-box;
+  content: "";
+  top: 50%;
+  right: 100%;
+  bottom: 0;
+  left: calc(var(--timestamp-width)/2*-1 + var(--gutter)*-1);
+  margin-right: var(--reply-spacing);
+  margin-top: calc(var(--spine-width)*-1/2);
+  margin-left: calc(var(--spine-width)*-1/2);
+  margin-bottom: calc(.125rem - 4px);
+  border-left: var(--spine-width) solid var(--mid-color);
+  border-bottom: 0 solid var(--mid-color);
+  border-right: 0 solid var(--mid-color);
+  border-top: var(--spine-width) solid var(--mid-color);
+  border-top-left-radius: 6px;
+}
+
+/* Message reply all children */
+.message_reply > * {
+  opacity: 0.75;
+}
+
+/* Message reply badge */
+.message_reply_badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg-color);
+  background: var(--disabled-color);
+
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  user-select: none;
+  margin-right: .25rem;
+  padding: 3px;
+}
+
+/* Message reply username */
+/*.message_reply > .username {
+
+}*/
+
+/* Message reply text */
+.message_reply > .message_content {
+  display: block;
+  overflow: hidden;
+  word-wrap: break-word;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-indent: 0;
+  cursor: pointer;
+}
+.message_reply > .message_content:hover {
+  opacity: 1;
+}
+
+
+/* Message reply bar */
+.reply_bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  overflow: hidden;
+  padding-top: -3px;
+  margin-top: -3px;
+
+  background-color: rgba(0, 0, 0, 0.3);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+
+  cursor: pointer;
+
+  color: var(--text-color);
+}
+/* Message reply bar text */
+.reply_bar_label {
+  flex: 1 1 auto;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-left: 16px;
+
+  font-size: 14px;
+  line-height: 18px;
+}
+/* Message reply bar close button */
+.reply_bar_close_button {
+  flex: 0 0 auto;
+  border-radius: 0;
+  cursor: pointer;
+  color: var(--text-color);
+  line-height: 0;
+  padding: 8px 20px;
+}
+/* Message reply bar close button image */
+.reply_bar_close_button > svg {
+  width: 16px;
+  height: 16px;
+}
+/* Elements that come after message reply bar, and all elements inside of the element that contains message reply bar */
+.reply_bar + * * {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Chat message being replied to */
+.replying_to_chat_message {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.replying_to_chat_message::before {
+  background-color: rgba(255, 255, 255, 0.5);
+  content: "";
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+  width: calc(5.6rem + 2px);
 }

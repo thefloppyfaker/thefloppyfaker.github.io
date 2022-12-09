@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>&ZeroWidthSpace;</title>
+    <link rel="shortcut icon" href="assets/images/favicon.png" type="image/png">
+    <link href="https://unpkg.com/marx-css/css/marx.min.css" rel="stylesheet">
+    <link id="theme" rel="stylesheet" type="text/css" href="assets/css/themes/darkbluemode.css" data-theme="darkbluemode">
+    <audio id="userNotificationSound">
+      <source src="assets/audio/notif1.wav" type="audio/wav">
+      <source src="assets/audio/notif1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="systemNotificationSound">
+      <source src="assets/audio/notif2.wav" type="audio/wav">
+      <source src="assets/audio/notif2.mp3" type="audio/mpeg">
+    </audio>
+    <!--<audio id="jinglingSound">
+      <source src="assets/audio/jingle_loop.mp3" type="audio/mpeg">
+    </audio>-->
+    <!--<script src="https://kit.fontawesome.com/3e820710a1.js" crossorigin="anonymous"></script>-->
+  </head>
+
+  <body data-interacted="" onclick="document.body.setAttribute('data-interacted', ' ')" onscroll="document.body.setAttribute('data-interacted', ' ')" onkeypress="document.body.setAttribute('data-interacted', ' ')">
+    <div id="dropzone" style="box-sizing:border-box;display:none;position:fixed;width:100%;height:100%;left:0;top:0;z-index:99999;background:rgba(69,69,69,0.8);border:11px dashed grey"></div>
+    <div style="height:0;width:0;overflow:hidden"><input id="upfile" type="file" value="" multiple></div>
+    
+    <button id="wipe" title="it's the wipey wiper" style="display:inline;position:absolute;right:0;top:0;margin:0;padding:0">💀</button>
+    <div id="snowflakes_container" style="display:block; max-width: 100%; height: 100%; overflow: hidden"></div>
+    <div id="app_wrapper">
+      <div id="chat_wrapper">
+        <div id="chat">
+
+          <div class="chat_message" data-type="others" id="7006031515121484264"><div class="message_header"><time class="message_timestamp" datetime="2022-12-06T23:07:58.976Z" title="Tue Dec 06 2022 6:07:58 PM"> 6:07 PM</time><span class="username others">Lanie<i>&nbsp;</i></span></div><span class="message_content">stabbed my thumb with a needle</span></div>
+          <div class="chat_message" data-type="you" id="7006036612308140590"><div class="message_header"><time class="message_timestamp" datetime="2022-12-06T23:28:14.240Z" title="Tue Dec 06 2022 6:28:14 PM"> 6:28 PM</time><span class="username you">Ryan<i>&nbsp;</i></span></div><span class="message_content">Ouch- I'm sorry :(</span></div>
+          <div class="chat_message" data-type="others" id="7006039965029238006"><div class="message_header"><time class="message_timestamp" datetime="2022-12-06T23:41:33.591Z" title="Tue Dec 06 2022 6:41:33 PM"> 6:41 PM</time><span class="username others">Lanie<i>&nbsp;</i></span></div><span class="message_content">my thumb ish oki</span></div>
+          <div class="chat_message" data-type="you" id="7006052451489023935"><div class="message_header"><time class="message_timestamp" datetime="2022-12-07T00:31:10.595Z" title="Tue Dec 06 2022 7:31:10 PM"> 7:31 PM</time><span class="username you">Ryan<i>&nbsp;</i></span></div><span class="message_content">yay :)</span></div>
+
+          <!--
+          <style>
+            
+            /* Message reply */
+            .message_reply {
+              /*--timestamp-width: 4rem;
+              --text-indent: -4rem;
+              margin-left: calc(var(--timestamp-width) + .25rem + var(--text-indent));*/
+              margin-left: 0.25rem;
+
+              display: flex;
+              align-items: center;
+              font-size: 0.875rem;
+              line-height: 1.125rem;
+              position: relative;
+              user-select: none;
+            }
+
+            /* Message reply spine pointer thingy */
+            .message_reply::before {
+              --spine-width: 2px;
+              --timestamp-width: 3.1rem;
+              --gutter: 0.25rem;
+              --reply-spacing: 4px;
+
+              display: block;
+              position: absolute;
+              box-sizing: border-box;
+              content: "";
+              top: 50%;
+              right: 100%;
+              bottom: 0;
+              left: calc(var(--timestamp-width)/2*-1 + var(--gutter)*-1);
+              margin-right: var(--reply-spacing);
+              margin-top: calc(var(--spine-width)*-1/2);
+              margin-left: calc(var(--spine-width)*-1/2);
+              margin-bottom: calc(.125rem - 4px);
+              border-left: var(--spine-width) solid var(--mid-color);
+              border-bottom: 0 solid var(--mid-color);
+              border-right: 0 solid var(--mid-color);
+              border-top: var(--spine-width) solid var(--mid-color);
+              border-top-left-radius: 6px;
+            }
+
+            /* Message reply all children */
+            .message_reply > * {
+              opacity: 0.75;
+            }
+
+            /* Message reply badge */
+            .message_reply_badge {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: var(--bg-color);
+              background: var(--disabled-color);
+
+              flex: 0 0 auto;
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              user-select: none;
+              margin-right: .25rem;
+              padding: 3px;
+            }
+
+            /* Message reply username */
+            /*.message_reply_container > .username {
+
+            }*/
+
+            /* Message reply text */
+            .message_reply > .message_content {
+              display: block;
+              overflow: hidden;
+              word-wrap: break-word;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              text-indent: 0;
+              cursor: pointer;
+            }
+            .message_reply > .message_content:hover {
+              opacity: 1;
+            }
+
+
+            .replying_to_chat_message {
+              background-color: rgba(255, 255, 255, 0.2);
+            }
+            .replying_to_chat_message::before {
+              background-color: rgba(255, 255, 255, 0.5);
+              content: "";
+              position: absolute;
+              display: block;
+              top: 0;
+              left: 0;
+              bottom: 0;
+              pointer-events: none;
+              width: calc(5.9rem + 2px);
+            }
+
+          </style>
+          -->
+
+          <div class="chat_message" data-type="you" id="7006052502399485892"><!--
+         --><div class="message_reply"><!--
+           --><div class="message_reply_badge"><svg class="SVGIcon-icon" shape-rendering="geometricPrecision" role="img" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 512 512"><!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M205 34.8c11.5 5.1 19 16.6 19 29.2v64H336c97.2 0 176 78.8 176 176c0 113.3-81.5 163.9-100.2 174.1c-2.5 1.4-5.3 1.9-8.1 1.9c-10.9 0-19.7-8.9-19.7-19.7c0-7.5 4.3-14.4 9.8-19.5c9.4-8.8 22.2-26.4 22.2-56.7c0-53-43-96-96-96H224v64c0 12.6-7.4 24.1-19 29.2s-25 3-34.4-5.4l-160-144C3.9 225.7 0 217.1 0 208s3.9-17.7 10.6-23.8l160-144c9.4-8.5 22.9-10.6 34.4-5.4z"/></svg></div><!--
+           --><span class="username others">Lanie</span><!--
+           --><div class="message_content" data-reply_id="7006031515121484264">stabbed my thumb with a needleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</div><!--
+         --></div>
+          
+            <div class="message_header"><time class="message_timestamp" datetime="2022-12-07T00:31:22.733Z" title="Tue Dec 06 2022 7:31:22 PM"> 7:31 PM</time><span class="username you">Ryan<i>&nbsp;</i></span></div><!--delete this comment
+         --><span class="message_content">Not me playing super Mario world on my SNES Not me playing super Mario world on my SNES Not me playing super Mario world on my SNES Not me playing super Mario world on my SNES</span>
+          </div>
+          
+          
+          
+          <div class="chat_message" data-type="others" id="7006057468241513098"><div class="message_header"><time class="message_timestamp" datetime="2022-12-07T00:51:06.682Z" title="Tue Dec 06 2022 7:51:06 PM"> 7:51 PM</time><span class="username others">Lanie<i>&nbsp;</i></span></div><span class="message_content">donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink </span></div>
+          <div class="chat_message replying_to_chat_message" data-type="you" id="7006057616090729103"><div class="message_header"><time class="message_timestamp" datetime="2022-12-07T00:51:41.932Z" title="Tue Dec 06 2022 7:51:41 PM"> 7:51 PM</time><span class="username you">Ryan<i>&nbsp;</i></span></div><span class="message_content">i</span></div>
+          <div class="chat_message" data-type="you" id="7006057650257529492"><div class="message_header"><time class="message_timestamp" datetime="2022-12-07T00:51:50.078Z" title="Tue Dec 06 2022 7:51:50 PM"> 7:51 PM</time><span class="username you">Ryan<i>&nbsp;</i></span></div><span class="message_content">how</span></div>
+          <div class="chat_message" data-type="others" id="7006057857112214169"><div class="message_header"><time class="message_timestamp" datetime="2022-12-07T00:52:39.396Z" title="Tue Dec 06 2022 7:52:39 PM"> 7:52 PM</time><span class="username others">Lanie<i>&nbsp;</i></span></div><span class="message_content">donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink donk dink doink </span></div>
+          <div class="chat_message" data-type="others" id="7006057909255801502"><div class="message_header"><time class="message_timestamp" datetime="2022-12-07T00:52:51.828Z" title="Tue Dec 06 2022 7:52:51 PM"> 7:52 PM</time><span class="username others">Lanie<i>&nbsp;</i></span></div><span class="message_content">donk dink doink</span></div>
+
+        </div>
+      </div>
+      <div id="is_typing_box"></div>
+
+
+
+      <!--
+      <style>
+        .reply_bar {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+
+          overflow: hidden;
+          padding-top: -3px;
+          margin-top: -3px;
+
+          background-color: var(--darker-color);
+          border-top-left-radius: 12px;
+          border-top-right-radius: 12px;
+
+          cursor: pointer;
+
+          color: var(--text-color);
+        }
+
+        .reply_bar_label {
+          flex: 1 1 auto;
+
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          margin-left: 16px;
+
+          font-size: 14px;
+          line-height: 18px;
+        }
+
+        .reply_bar_close_button {
+          flex: 0 0 auto;
+
+          border-radius: 0;
+
+          cursor: pointer;
+          color: var(--text-color);
+          line-height: 0;
+          padding: 8px 20px;
+        }
+
+        .reply_bar_close_button > svg {
+          width: 16px;
+          height: 16px;
+        }
+        
+        .reply_bar + * * {
+          border-top-left-radius: 0;
+          border-top-right-radius: 0;
+        }
+
+      </style>
+      -->
+
+
+      <div class="reply_bar">
+        <div class="reply_bar_label">Replying to <span class="username you">thefloppydriver</span></div>
+        <button class="reply_bar_close_button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="SVGIcon-icon"><path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"/></svg></button>
+      </div>
+      
+
+
+
+
+
+      <div class="input_area_wrapper">
+        <div class="input_area">
+          <button id="upload" onclick="document.getElementById('upfile').click()" title="it's the uppy upper" style="height:100%;border-top-right-radius:0;border-bottom-right-radius:0;"><svg class="svg-inline--fa fa-circle-chevron-up fa-xl" style="vertical-align: middle;line-height: 1.5em;" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="circle-chevron-up" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM377 271c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-87-87-87 87c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9L239 167c9.4-9.4 24.6-9.4 33.9 0L377 271z"></path></svg></button>
+          <div class="message_box_wrapper">
+            <div id="bottom_message_box" class="message_box"></div>
+          </div>          
+          <button id="send" title="it's the sendy sender" style="height:100%;border-top-left-radius:0;border-bottom-left-radius:0;"><svg class="svg-inline--fa fa-circle-chevron-right fa-xl" style="vertical-align: middle;line-height: 1.5em;" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="circle-chevron-right" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M0 256C0 397.4 114.6 512 256 512s256-114.6 256-256S397.4 0 256 0S0 114.6 0 256zM241 377c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l87-87-87-87c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0L345 239c9.4 9.4 9.4 24.6 0 33.9L241 377z"></path></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <audio id="remoteAudio"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="https://unpkg.com/magic-snowflakes/dist/snowflakes.min.js"></script>
+  </body>
+</html>
