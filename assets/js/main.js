@@ -1240,8 +1240,8 @@ preload_data().then((preloaded) => {
 
   //(DESC) Custom class definitions and related helper functions
   class Base {
-  //(DESC) This class represents a data model that is identifiable by a Snowflake
-  //id; //(TYPE) Snowflake {string}
+    //(DESC) This class represents a data model that is identifiable by a Snowflake
+    //id; //(TYPE) Snowflake {string}
     id = "";
 
     static get constructor_properties() {
@@ -1284,6 +1284,7 @@ preload_data().then((preloaded) => {
     }
 
     static isConstructed(base_class_object) {
+      if (base_class_object === null || base_class_object === undefined) return false;
       let is_constructed = true;
 
       try {
@@ -1420,6 +1421,7 @@ preload_data().then((preloaded) => {
     }
 
     static isConstructed(channel) {
+      if (channel === null || channel === undefined) return false;
       let is_constructed = true;
 
       try {
@@ -1475,6 +1477,7 @@ preload_data().then((preloaded) => {
     }
 
     static isConstructed(user) {
+      if (user === null || user === undefined) return false;
       let is_constructed = true;
 
       try {
@@ -1531,6 +1534,7 @@ preload_data().then((preloaded) => {
     }
 
     static isConstructed(message) {
+      if (message === null || message === undefined) return false;
       let is_constructed = true;
 
       try {
@@ -2002,10 +2006,12 @@ preload_data().then((preloaded) => {
     if (message_elements_above_cache.length === 0 || BigInt(message_element.id) >= BigInt(message_elements_above_cache[message_elements_above_cache.length - 1].id)) {
     //(DESC) This message is the newest (or only, that still makes it the newest) message in message_elements_above_cache array, add it to the end of the array.
       message_elements_above_cache.push(message_element);
+      message_ids_above_cache_array.push(message_element.id);
     }
     else if (BigInt(message_element.id) <= BigInt(message_elements_above_cache[0].id)) {
     //(DESC) This message is the oldest message in message_elements_above_cache array, add it to the beginning of the array.
       message_elements_above_cache.unshift(message_element);
+      message_ids_above_cache_array.unshift(message_element.id);
     }
     else {
     //(DESC) This message is between the oldest message and the newest message in message_elements_above_cache array. Find it's place and insert it there.
@@ -2019,6 +2025,7 @@ preload_data().then((preloaded) => {
         //(NOTE) message_element.id is between message_elements_above_cache[i] and message_elements_above_cache[i+1]
         //(NOTE) message_element.id is newer than message_elements_above_cache[i] and older than message_elements_above_cache[i+1]
           message_elements_above_cache.splice(i + 1, 0, message_element);
+          message_ids_above_cache_array.splice(i + 1, 0, message_element.id);
           break;
         }
       }
@@ -2055,10 +2062,12 @@ preload_data().then((preloaded) => {
     if (message_elements_below_cache.length === 0 || BigInt(message_element.id) <= BigInt(message_elements_below_cache[message_elements_below_cache.length - 1].id)) {
     //(DESC) This message is the oldest (or only, that still makes it the oldest) message in message_elements_below_cache array, add it to the end of the array.
       message_elements_below_cache.push(message_element);
+      message_ids_below_cache_array.push(message_element.id);
     }
     else if (BigInt(message_element.id) >= BigInt(message_elements_below_cache[0].id)) {
     //(DESC) This message is the newest message in message_elements_below_cache array, add it to the beginning of the array.
       message_elements_below_cache.unshift(message_element);
+      message_ids_below_cache_array.unshift(message_element.id);
     }
     else {
     //(DESC) This message is between the oldest message and the newest message in message_elements_below_cache array. Find it's place and insert it there.
@@ -2072,6 +2081,7 @@ preload_data().then((preloaded) => {
         //(NOTE) message_element.id is between message_elements_below_cache[i] and message_elements_below_cache[i+1]
         //(NOTE) message_element.id is older than message_elements_below_cache[i] and newer than message_elements_below_cache[i+1]
           message_elements_below_cache.splice(i + 1, 0, message_element);
+          message_ids_below_cache_array.splice(i + 1, 0, message_element.id);
           break;
         }
       }
@@ -2084,6 +2094,13 @@ preload_data().then((preloaded) => {
     return message_element;
   }
 
+
+  //(TODO) Create remove_element_from_above_cache and remove_element_from_below_cache functions
+
+  //(DESC) Mirror of message_elements_above_cache, but it contains the corresponding message ids instead of the message elements.
+  //(NOTE) DO NOT EDIT THESE ARRAYS DIRECTLY, USE THEIR ACCESSOR FUNCTIONS ABOVE!!!!!
+  const message_ids_above_cache_array = [];
+  const message_ids_below_cache_array = [];
 
   const message_elements_above_cache = [];
   const message_elements_below_cache = [];
@@ -2132,10 +2149,11 @@ preload_data().then((preloaded) => {
     }
 
     if (message_elements_above_cache.length > 0) {
-      for (let i = 0;i < 50;i++) { //(DESC) Limit the otherwise infinite loop to 50 iterations.
+      for (let i = 0; i < 50; i++) { //(DESC) Limit the otherwise "infinite" loop to 50 iterations so that we don't crash the page.
         if (message_elements_above_cache.length > 0 && chat_wrapper.scrollTop <= chat_wrapper.clientHeight) {
         //(DESC) User is scrolling to the top, we need to pull the LAST message (message_elements_above_cache.pop()) from the message_elements_above_cache array and add it to the beginning of the chat
           const uncached_message = message_elements_above_cache.pop();
+          message_ids_above_cache_array.pop();
 
           chat.insertBefore(uncached_message, document.getElementById(set_metadata_of_message_from_message_ids_array(uncached_message.id, { cached: false }).between_message_ids.newer));
         }
@@ -2145,10 +2163,12 @@ preload_data().then((preloaded) => {
       }
     }
     if (message_elements_below_cache.length > 0) {
-      for (let i = 0;i < 50;i++) { //(DESC) Limit the otherwise infinite loop to 50 iterations.
+      for (let i = 0; i < 50; i++) { //(DESC) Limit the otherwise "infinite" loop to 50 iterations so that we don't crash the page.
         if (message_elements_below_cache.length > 0 && chat_wrapper.scrollHeight - (chat_wrapper.clientHeight + chat_wrapper.scrollTop) <= chat_wrapper.clientHeight) {
         //(DESC) User is scrolling to the bottom, we need to pull FIRST message (message_elements_below_cache.pop()) from the message_elements_below_cache array and add it to the end of the chat
           const uncached_message = message_elements_below_cache.pop();
+          message_ids_below_cache_array.pop();
+
           chat.appendChild(uncached_message);
           set_metadata_of_message_from_message_ids_array(uncached_message.id, { cached: false });
         }
@@ -2669,31 +2689,68 @@ preload_data().then((preloaded) => {
 
     const message_type = get_username_style_by_user_id(message.author.id);
 
-    /*//(BIGCHANGE) if (!snowflake) {
-    timestamp = Date.now();
-  }
-  else {
-    timestamp = Number(BigInt(snowflake) >> 22n);
-  }*/
+    /*//(BIGCHANGE)
+    if (!snowflake) {
+      timestamp = Date.now();
+    }
+    else {
+      timestamp = Number(BigInt(snowflake) >> 22n);
+    }*/
     const timestamp = Number(message.timestamp);
 
+    let message_already_logged = false;
+    let message_already_logged_cached_state = null;
+    let message_already_logged_old_chat_message_element = false;
+    //let message_already_logged_index = false;
+    //let message_already_logged_element = false;
     //(DESC) Message is already logged.
     if (message_ids_array.includes(message.id)) { //(CODE) if (message_ids_array.includes(message.id)) return;
-    //(DESC) Remove message from remove_message_from_message_ids_array (so that we can insert it again!! :D);
-      remove_message_from_message_ids_array(message.id);
-      document.getElementById(message.id).remove();
+      //(NOTE) Instead of removing the message, we'll replace it!
+      message_already_logged = true;
+
+      const old_message_metadata = get_metadata_of_message_from_message_ids_array(message.id);
+      if (old_message_metadata === false) {
+        console.log("ERROR: showMessage: message_ids_array and message_ids_metadata_array are probably out of sync, this is VERY BAD. Not logging message.");
+        return false;
+      }
+      if (old_message_metadata.cached === undefined || old_message_metadata.cached === null) {
+        console.log("ERROR: showMessage: old_message_metadata.cached is undefined or null, you should investigate. Not logging message.");
+        return false;
+      }
+
+      if (
+        old_message_metadata.cached !== false &&
+        old_message_metadata.cached !== "above" &&
+        old_message_metadata.cached !== "below"
+      ) {
+        console.log("ERROR: showMessage: we're fucked. Not logging message.");
+        return false;
+      }
+
+      if (old_message_metadata.cached === false) {
+        message_already_logged_old_chat_message_element = document.getElementById(message.id);
+      }
+
+      //(DESC) Set message_already_logged_cached_state so that the program can insert the edited message where it needs to go
+      message_already_logged_cached_state = old_message_metadata.cached;
+
+      //(NOTE) Message cache state successfully
     }
 
     const chat_message_div = document.createElement("div");
     chat_message_div.className = "chat_message";
     chat_message_div.setAttribute("data-type", message_type);
-    /*//(BIGCHANGE) if (snowflake) {
-    chat_message_div.id = snowflake;
-  }
-  else {
-    //(TODO)(FIX)(NOTE) THIS GENERATES INVALID IDS!!
-    chat_message_div.id = (BigInt(timestamp) << 22n).toString(10);
-  }*/
+    /*
+    //(BIGCHANGE)
+    if (snowflake) {
+      chat_message_div.id = snowflake;
+    }
+    else {
+      //(TODO)(FIX)(NOTE) THIS GENERATES INVALID IDS!!
+      chat_message_div.id = (BigInt(timestamp) << 22n).toString(10);
+    }*/
+
+    //(TODO) Check how the line below affects the functionality of message editing
     chat_message_div.id = message.id;
 
     //(DESC) Insert the reply element if there was a reply.
@@ -2827,6 +2884,41 @@ preload_data().then((preloaded) => {
     chat_message_div.appendChild(message_header_div);
     chat_message_div.appendChild(message_content_span);
 
+
+    //(DESC) If message is already logged, replace it's contents, wherever those contents may be. (EDIT MESSAGE)
+    if (message_already_logged === true) {
+      const message_ids_array_index = message_ids_array.indexOf(message.id);
+      if (message_ids_array_index === -1) {
+        console.log("ERROR: showMessage: message.id not found in message_ids_array. This is really bad, like race condition vroom vroom smash your dick with a rock bad. Not logging message.");
+        return false;
+      } // Early return false on pass...
+
+      //(DESC) Replace the dusty old message in the message_ids_data_array with our fancy new message
+      message_ids_data_array[message_ids_array_index] = message;
+
+      if (message_already_logged_cached_state === false) {
+        chat.replaceChild(chat_message_div, message_already_logged_old_chat_message_element);
+        //(DEBUG)(CODE) console.log("Updated message on document"); //(DEBUG)
+      }
+      else if (message_already_logged_cached_state === "above") {
+        const message_ids_above_cache_array_index = message_ids_above_cache_array.indexOf(message.id);
+        message_elements_above_cache[message_ids_above_cache_array_index] = chat_message_div;
+        //(DEBUG)(CODE) console.log("Updated message in above cache"); //(DEBUG)
+      }
+      else if (message_already_logged_cached_state === "below") {
+        const message_ids_below_cache_array_index = message_ids_below_cache_array.indexOf(message.id);
+        message_elements_below_cache [message_ids_below_cache_array_index] = chat_message_div;
+        //(DEBUG)(CODE) console.log("Updated message in below cache"); //(DEBUG)
+      }
+      else {
+        console.log("ERROR: showMessage: Not showing edited message. OWO WE'RE FUCKED BECAUSE message_already_logged_cached_state IS", message_already_logged_cached_state);
+        return false;
+      } // Early return false on pass...
+
+      return true;
+    } // Early return bool on pass...
+
+
     const added_message = add_message_to_message_ids_array(message);
     if (added_message === false) {
       console.log("ERROR: Function add_message_to_message_ids_array failed!!!");
@@ -2940,6 +3032,7 @@ preload_data().then((preloaded) => {
       }
     }
 
+    return true;
   }
 
 
