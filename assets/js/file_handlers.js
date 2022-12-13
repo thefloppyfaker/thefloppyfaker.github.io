@@ -1,29 +1,29 @@
-var dropZone = document.getElementById('dropzone');
+const dropZone = document.getElementById('dropzone');
 
 function showDropZone() {
-	dropZone.style.display = "block";
+  dropZone.style.display = "block";
 }
 function hideDropZone() {
-    dropZone.style.display = "none";
+  dropZone.style.display = "none";
 }
 
 function allowDrag(ev) {
   if (true) {  // Test that the item being dragged is a valid one
-      ev.dataTransfer.dropEffect = 'copy';
-      ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'copy';
+    ev.preventDefault();
   }
 }
 
 // Convert file to base64 string
 const fileToBase64 = (file) => {
   return new Promise(resolve => {
-    var reader = new FileReader();
+    const reader = new FileReader();
     // Read file content on file loaded event
     reader.onload = function(event) {
       resolve(event.target.result);
     };
-    
-    // Convert data to base64 
+
+    // Convert data to base64
     reader.readAsDataURL(file);
   });
 };
@@ -53,19 +53,20 @@ function dropHandler(ev) {
         }
       }
     });
-  } else {
+  }
+  else {
     // Use DataTransfer interface to access the file(s)
     [...ev.dataTransfer.files].forEach((file, i) => {
       console.log(`… file[${i}].name = ${file.name}`);
       console.log(`… file[${i}].size = ${file.size}`);
-        if (file.size < 32000000) {
-          fileToBase64(file).then(result => {
-            console.log(result);
-          });
-        }
-        else {
-          alert('File must be smaller than 32MB!!');
-        }
+      if (file.size < 32000000) {
+        fileToBase64(file).then(result => {
+          console.log(result);
+        });
+      }
+      else {
+        alert('File must be smaller than 32MB!!');
+      }
     });
   }
 }
@@ -81,11 +82,10 @@ dropZone.addEventListener('dragover', allowDrag);
 
 // 3
 dropZone.addEventListener('dragleave', function(ev) {
-	console.log('dragleave');
-    hideDropZone();
+  console.log('dragleave');
+  hideDropZone();
 });
 
 // 4
 dropZone.addEventListener('drop', dropHandler);
-
 
