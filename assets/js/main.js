@@ -825,13 +825,14 @@ preload_data().then((preloaded) => {
     }
     */
       function get_target_chat_message_element_from_event(ev) {
-        for (let i = 0;i < ev.path.length;i++) {
-          if (ev.path[i].parentElement?.id === chat.id && ev.path[i].classList?.contains("chat_message")) { //(CODE) && !(ev.path[i].getAttribute("data-type") === "sys")) {
-            const target_chat_message_element = ev.path[i];
+        const event_path = ev.path || (ev.composedPath && ev.composedPath());
+        for (let i = 0;i < event_path.length;i++) {
+          if (event_path[i].parentElement?.id === chat.id && event_path[i].classList?.contains("chat_message")) { //(CODE) && !(event_path[i].getAttribute("data-type") === "sys")) {
+            const target_chat_message_element = event_path[i];
             return target_chat_message_element;
             //break;
           }
-          if (i === ev.path.length - 1) {
+          if (i === event_path.length - 1) {
             console.log("ERROR: get_target_chat_message_element_from_event: could not get chat message element");
             return false;
           }
@@ -2383,18 +2384,19 @@ preload_data().then((preloaded) => {
 });*/
 
   window.onmouseover = (ev) => {
-  //console.log(ev);
+    const event_path = ev.path || (ev.composedPath && ev.composedPath());
+    //console.log(ev);
     if (ev.shiftKey) {
-      document.documentElement.style.setProperty('--shift-not-pressed-visibility-flex', 'none');
-      document.documentElement.style.setProperty('--shift-pressed-visibility-flex', 'flex');
+      document.documentElement.style.setProperty("--shift-not-pressed-visibility-flex", "none");
+      document.documentElement.style.setProperty("--shift-pressed-visibility-flex", "flex");
     }
     /*else {
-    document.documentElement.style.setProperty('--shift-not-pressed-visibility-flex', 'flex');
-    document.documentElement.style.setProperty('--shift-pressed-visibility-flex', 'none');
-  }*/
-    for (let i = 0;i < ev.path.length;i++) {
-      if (ev.path[i].parentElement?.id === chat.id && ev.path[i].classList?.contains("chat_message") && !ev.path[i].hasAttribute("data-hasquickactionbar") && !ev.path[i].hasAttribute("data-no-quickactionbar")) { //(CODE) && !(ev.path[i].getAttribute("data-type") === "sys")) {
-        Styler.add_QuickActionBar(ev.path[i]);
+      document.documentElement.style.setProperty("--shift-not-pressed-visibility-flex", "flex");
+      document.documentElement.style.setProperty("--shift-pressed-visibility-flex", "none");
+    }*/
+    for (let i = 0;i < event_path.length;i++) {
+      if (event_path[i].parentElement?.id === chat.id && event_path[i].classList?.contains("chat_message") && !event_path[i].hasAttribute("data-hasquickactionbar") && !event_path[i].hasAttribute("data-no-quickactionbar")) { //(CODE) && !(event_path[i].getAttribute("data-type") === "sys")) {
+        Styler.add_QuickActionBar(event_path[i]);
         break;
       }
     }
